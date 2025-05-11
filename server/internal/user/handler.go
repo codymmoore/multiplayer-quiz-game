@@ -120,10 +120,9 @@ func GetUsersHandler(service Service) http.HandlerFunc {
 // UpdateUserHandler Handler function for update user endpoint
 func UpdateUserHandler(service Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var request dto.UpdateUserRequest
-		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		request, err := generateUpdateUserRequest(r)
+		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
 		}
 
 		if err := ValidateUpdateUserRequest(request); err != nil {
@@ -176,7 +175,7 @@ func generateGetUserRequest(r *http.Request) (dto.GetUserRequest, error) {
 	query := r.URL.Query()
 	var request dto.GetUserRequest
 
-	if userIdStr := query.Get("user_id"); userIdStr != "" {
+	if userIdStr := query.Get("id"); userIdStr != "" {
 		userId, err := strconv.Atoi(userIdStr)
 		if err != nil {
 			return dto.GetUserRequest{}, err
@@ -222,6 +221,24 @@ func generateGetUsersRequest(r *http.Request) (dto.GetUsersRequest, error) {
 
 	if sortOrder := query.Get("sort_order"); sortOrder != "" {
 		request.SortOrder = &sortOrder
+	}
+
+	return request, nil
+}
+
+// generateUpdateUserRequest Populate and return UpdateUserRequest
+func generateUpdateUserRequest(r *http.Request) (dto.UpdateUserRequest, error) {
+	var request dto.UpdateUserRequest
+
+	userIdStr := chi.URLParam(r, "id")
+	userId, err := strconv.Atoi(userIdStr)
+	if err != nil {
+		return dto.UpdateUserRequest{}, err
+	}
+	request.UserId = userId
+
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return dto.UpdateUserRequest{}, err
 	}
 
 	return request, nil

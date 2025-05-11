@@ -3,6 +3,7 @@ package user
 import (
 	"common"
 	"context"
+	"database/sql"
 	"github.com/go-chi/jwtauth/v5"
 	"net/http"
 	"user/db"
@@ -28,9 +29,9 @@ func AuthMiddleware(queries db.Queries) func(http.Handler) http.Handler {
 				}
 
 				params := db.GetUserParams{
-					ID:       int32(claims.ID),
-					Username: claims.Username,
-					Email:    claims.Email,
+					ID:       sql.NullInt32{Int32: int32(claims.ID), Valid: true},
+					Username: sql.NullString{String: claims.Username, Valid: true},
+					Email:    sql.NullString{String: claims.Email, Valid: true},
 				}
 				if _, err = queries.GetUser(ctx, params); err != nil {
 					http.Error(w, err.Error(), http.StatusUnauthorized)

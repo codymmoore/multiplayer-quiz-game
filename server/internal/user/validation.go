@@ -55,8 +55,8 @@ func ValidateGetUsersRequest(request dto.GetUsersRequest) error {
 		return errors.New("limit must be greater than zero")
 	}
 
-	if request.Offset != nil && *request.Offset <= 0 {
-		return errors.New("offset must be greater than zero")
+	if request.Offset != nil && *request.Offset < 0 {
+		return errors.New("offset must be a positive number")
 	}
 
 	if request.SortField != nil {
