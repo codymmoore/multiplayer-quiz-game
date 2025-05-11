@@ -7,9 +7,9 @@ RETURNING *;
 SELECT *
 FROM users
 WHERE
-    (id = $1 OR $1 IS NULL) AND
-    (username = $2 OR $2 IS NULL) AND
-    (email = $3 OR $3 IS NULL) AND
+    (id = sqlc.narg(id) OR sqlc.narg(id) IS NULL) AND
+    (username = sqlc.narg(username) OR sqlc.narg(username) IS NULL) AND
+    (email = sqlc.narg(email) OR sqlc.narg(email) IS NULL) AND
     is_active = true
 LIMIT 1;
 
@@ -30,11 +30,17 @@ WHERE
 
 -- name: UpdateUser :one
 UPDATE users
-    SET username = CASE WHEN $2 IS NULL THEN username ELSE $2 END,
-        email = CASE WHEN $3 IS NULL THEN email ELSE $3 END,
-        password_hash = CASE WHEN $4 IS NULL THEN password_hash ELSE $4 END
+SET username = COALESCE(sqlc.narg(username), username),
+    email = COALESCE(sqlc.narg(email), email),
+    password_hash = COALESCE(sqlc.narg(password_hash), password_hash)
 WHERE id = $1
 RETURNING *;
+-- UPDATE users
+--     SET username = CASE WHEN sqlc.narg(username) IS NULL THEN username ELSE sqlc.narg(username) END,
+--         email = CASE WHEN sqlc.narg(email) IS NULL THEN email ELSE sqlc.narg(email) END,
+--         password_hash = CASE WHEN sqlc.narg(password_hash) IS NULL THEN password_hash ELSE sqlc.narg(password_hash) END
+-- WHERE id = $1
+-- RETURNING *;
 
 -- name: DeactivateUser :exec
 UPDATE users

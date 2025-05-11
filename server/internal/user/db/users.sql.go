@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 )
 
 const countUsers = `-- name: CountUsers :one
@@ -54,11 +55,20 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const deactivateUser = `-- name: DeactivateUser :exec
+
 UPDATE users
     SET is_active = false
 WHERE id = $1
 `
 
+// UPDATE users
+//
+//	SET username = CASE WHEN sqlc.narg(username) IS NULL THEN username ELSE sqlc.narg(username) END,
+//	    email = CASE WHEN sqlc.narg(email) IS NULL THEN email ELSE sqlc.narg(email) END,
+//	    password_hash = CASE WHEN sqlc.narg(password_hash) IS NULL THEN password_hash ELSE sqlc.narg(password_hash) END
+//
+// WHERE id = $1
+// RETURNING *;
 func (q *Queries) DeactivateUser(ctx context.Context, id int32) error {
 	_, err := q.db.ExecContext(ctx, deactivateUser, id)
 	return err
@@ -76,9 +86,9 @@ LIMIT 1
 `
 
 type GetUserParams struct {
-	ID       int32
-	Username string
-	Email    string
+	ID       sql.NullInt32
+	Username sql.NullString
+	Email    sql.NullString
 }
 
 func (q *Queries) GetUser(ctx context.Context, arg GetUserParams) (User, error) {
@@ -144,18 +154,18 @@ func (q *Queries) GetUsers(ctx context.Context, arg GetUsersParams) ([]User, err
 
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
-    SET username = CASE WHEN $2 IS NULL THEN username ELSE $2 END,
-        email = CASE WHEN $3 IS NULL THEN email ELSE $3 END,
-        password_hash = CASE WHEN $4 IS NULL THEN password_hash ELSE $4 END
+SET username = COALESCE($2, username),
+    email = COALESCE($3, email),
+    password_hash = COALESCE($4, password_hash)
 WHERE id = $1
 RETURNING id, username, email, password_hash, is_active, is_verified, created_at, updated_at
 `
 
 type UpdateUserParams struct {
 	ID           int32
-	Username     string
-	Email        string
-	PasswordHash string
+	Username     sql.NullString
+	Email        sql.NullString
+	PasswordHash sql.NullString
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
