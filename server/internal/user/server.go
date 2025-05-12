@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"github.com/go-chi/chi/v5"
@@ -12,6 +13,8 @@ import (
 	"os"
 	"user/db"
 )
+
+var baseUrl string
 
 // RunServer Start the user service and listen for requests
 func RunServer() {
@@ -33,7 +36,7 @@ func RunServer() {
 		return
 	}
 
-	baseUrl, err := getBaseUrl()
+	baseUrl, err = getBaseUrl()
 	if err != nil {
 		log.Fatalf("Error getting base url: %v", err)
 		return
@@ -42,7 +45,6 @@ func RunServer() {
 	queries := db.New(database)
 	service := &ServiceImpl{
 		Queries: *queries,
-		BaseUrl: baseUrl,
 	}
 
 	router := chi.NewRouter()
@@ -50,7 +52,7 @@ func RunServer() {
 	router.Use(middleware.Logger)
 	// TODO router.Use(jwtauth.Verifier(tokenAuth))
 	// TODO router.Use(jwtauth.Authenticator(tokenAuth))
-	// router.Use(user.AuthMiddleware(*queries))
+	// TODO router.Use(user.authMiddleware(*queries))
 
 	router.Post("/user", CreateUserHandler(service))
 	router.Get("/user/me", GetCurrentUserHandler(service))
@@ -88,6 +90,11 @@ func getDatabaseConnection() (*sql.DB, error) {
 	return database, nil
 }
 
+// getRouteUrl Get the base URL + route pattern for specified context
+func getRouteUrl(context context.Context) string {
+	return baseUrl + getRoutePattern(context)
+}
+
 // getBaseUrl Generates the base URL using the host and port specified in the environment file
 func getBaseUrl() (string, error) {
 	host := os.Getenv("HOST")
@@ -101,4 +108,10 @@ func getBaseUrl() (string, error) {
 	}
 
 	return host + ":" + port, nil
+}
+
+// getRoutePattern Get the route from the specified context
+func getRoutePattern(context context.Context) string {
+	routeContext := chi.RouteContext(context)
+	return routeContext.RoutePattern()
 }
