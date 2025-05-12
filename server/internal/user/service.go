@@ -24,7 +24,6 @@ type Service interface {
 // ServiceImpl Implementation for the Service
 type ServiceImpl struct {
 	Queries db.Queries
-	BaseUrl string
 }
 
 // CreateUser Create a new user
@@ -58,11 +57,6 @@ func (service *ServiceImpl) GetUser(context context.Context, request dto.GetUser
 	dto.GetUserResponse,
 	error,
 ) {
-	// params := db.GetUserParams{
-	// 	ID:       int32(*request.UserId),
-	// 	Username: *request.Username,
-	// 	Email:    *request.Email,
-	// }
 	var params db.GetUserParams
 
 	if userId := request.UserId; userId != nil {
@@ -101,6 +95,7 @@ func (service *ServiceImpl) GetUser(context context.Context, request dto.GetUser
 }
 
 // GetUsers Retrieve all users (paginated)
+// TODO implement sorting
 func (service *ServiceImpl) GetUsers(
 	context context.Context,
 	request dto.GetUsersRequest,
@@ -146,7 +141,7 @@ func (service *ServiceImpl) GetUsers(
 		}
 		prevLink := fmt.Sprintf(
 			"%s?limit=%d&offset=%d",
-			service.BaseUrl,
+			GetRouteUrl(context),
 			params.Limit,
 			prevOffset,
 		)
@@ -160,7 +155,7 @@ func (service *ServiceImpl) GetUsers(
 	if usersRemaining > 0 {
 		nextLink := fmt.Sprintf(
 			"%s?limit=%d&offset=%d",
-			service.BaseUrl,
+			GetRouteUrl(context),
 			params.Limit,
 			params.Offset+params.Limit,
 		)
