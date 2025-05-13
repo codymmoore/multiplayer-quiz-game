@@ -11,7 +11,7 @@ import (
     "log"
     "net/http"
     "os"
-    "user/db"
+    "user/db/generated"
 )
 
 // RunServer Start the user service and listen for requests

@@ -7,7 +7,7 @@ import (
 	"database/sql"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
-	"user/db"
+	"user/db/generated"
 	"user/dto"
 )
 

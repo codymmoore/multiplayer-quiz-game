@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
-	"user/db"
+	"user/db/generated"
 	"user/dto"
 )
 
