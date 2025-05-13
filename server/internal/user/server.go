@@ -38,19 +38,23 @@ func RunServer() {
     }
 
     router := chi.NewRouter()
+    router.Use(middleware.RequestID)
+    router.Use(middleware.RealIP)
     router.Use(middleware.Logger)
+    router.Use(middleware.Recoverer)
+
     router.Post("/user", CreateUserHandler(service))
     router.Group(
-        func(r chi.Router) {
+        func(router chi.Router) {
             // TODO r.Use(jwtauth.Verifier(tokenAuth))
             // TODO r.Use(jwtauth.Authenticator(tokenAuth))
             // TODO r.Use(user.authMiddleware(*queries))
 
-            r.Get("/user/me", GetCurrentUserHandler(service))
-            r.Get("/user", GetUserHandler(service))
-            r.Get("/user/all", GetUsersHandler(service))
-            r.Put("/user/{id}", UpdateUserHandler(service))
-            r.Delete("/user/{id}", DeleteUserHandler(service))
+            router.Get("/user/me", GetCurrentUserHandler(service))
+            router.Get("/user", GetUserHandler(service))
+            router.Get("/user/all", GetUsersHandler(service))
+            router.Patch("/user/{id}", UpdateUserHandler(service))
+            router.Delete("/user/{id}", DeleteUserHandler(service))
         },
     )
 
