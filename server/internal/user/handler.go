@@ -18,12 +18,12 @@ func CreateUserHandler(service Service) http.HandlerFunc {
 			return
 		}
 
-		if err := ValidateCreateUserRequest(request); err != nil {
+		if err := ValidateCreateUserRequest(&request); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		response, err := service.CreateUser(r.Context(), request)
+		response, err := service.CreateUser(r.Context(), &request)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -40,7 +40,7 @@ func CreateUserHandler(service Service) http.HandlerFunc {
 // GetCurrentUserHandler Handler function for get current user endpoint
 func GetCurrentUserHandler(service Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userClaims, ok := r.Context().Value(USER_CLAIMS_KEY).(*common.UserClaims)
+		userClaims, ok := r.Context().Value(common.UsersClaimKey).(*common.UserClaims)
 		if !ok {
 			http.Error(w, `{"error":"User claims not found"}`, http.StatusUnauthorized)
 			return
@@ -50,7 +50,7 @@ func GetCurrentUserHandler(service Service) http.HandlerFunc {
 			UserId: &userClaims.ID,
 		}
 
-		response, err := service.GetUser(r.Context(), request)
+		response, err := service.GetUser(r.Context(), &request)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -156,7 +156,7 @@ func DeleteUserHandler(service Service) http.HandlerFunc {
 		}
 
 		request.UserId = userId
-		response, err := service.DeleteUser(r.Context(), request)
+		response, err := service.DeleteUser(r.Context(), &request)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -171,14 +171,14 @@ func DeleteUserHandler(service Service) http.HandlerFunc {
 }
 
 // generateGetUserRequest Populate and return GetUserRequest
-func generateGetUserRequest(r *http.Request) (dto.GetUserRequest, error) {
+func generateGetUserRequest(r *http.Request) (*dto.GetUserRequest, error) {
 	query := r.URL.Query()
 	var request dto.GetUserRequest
 
 	if userIdStr := query.Get("id"); userIdStr != "" {
 		userId, err := strconv.Atoi(userIdStr)
 		if err != nil {
-			return dto.GetUserRequest{}, err
+			return &dto.GetUserRequest{}, err
 		}
 		request.UserId = &userId
 	}
@@ -191,18 +191,18 @@ func generateGetUserRequest(r *http.Request) (dto.GetUserRequest, error) {
 		request.Email = &email
 	}
 
-	return request, nil
+	return &request, nil
 }
 
 // generateGetUsersRequest Populate and return GetUsersRequest
-func generateGetUsersRequest(r *http.Request) (dto.GetUsersRequest, error) {
+func generateGetUsersRequest(r *http.Request) (*dto.GetUsersRequest, error) {
 	query := r.URL.Query()
 	var request dto.GetUsersRequest
 
 	if limitStr := query.Get("limit"); limitStr != "" {
 		limit, err := strconv.Atoi(limitStr)
 		if err != nil {
-			return dto.GetUsersRequest{}, err
+			return &dto.GetUsersRequest{}, err
 		}
 		request.Limit = &limit
 	}
@@ -210,7 +210,7 @@ func generateGetUsersRequest(r *http.Request) (dto.GetUsersRequest, error) {
 	if offsetStr := query.Get("offset"); offsetStr != "" {
 		offset, err := strconv.Atoi(offsetStr)
 		if err != nil {
-			return dto.GetUsersRequest{}, err
+			return &dto.GetUsersRequest{}, err
 		}
 		request.Offset = &offset
 	}
@@ -223,23 +223,23 @@ func generateGetUsersRequest(r *http.Request) (dto.GetUsersRequest, error) {
 		request.SortOrder = &sortOrder
 	}
 
-	return request, nil
+	return &request, nil
 }
 
 // generateUpdateUserRequest Populate and return UpdateUserRequest
-func generateUpdateUserRequest(r *http.Request) (dto.UpdateUserRequest, error) {
+func generateUpdateUserRequest(r *http.Request) (*dto.UpdateUserRequest, error) {
 	var request dto.UpdateUserRequest
 
 	userIdStr := chi.URLParam(r, "id")
 	userId, err := strconv.Atoi(userIdStr)
 	if err != nil {
-		return dto.UpdateUserRequest{}, err
+		return &dto.UpdateUserRequest{}, err
 	}
 	request.UserId = userId
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return dto.UpdateUserRequest{}, err
+		return &dto.UpdateUserRequest{}, err
 	}
 
-	return request, nil
+	return &request, nil
 }

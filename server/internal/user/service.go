@@ -2,6 +2,7 @@
 package user
 
 import (
+	"common"
 	"context"
 	"database/sql"
 	"fmt"
@@ -10,15 +11,15 @@ import (
 	"user/dto"
 )
 
-const DEFAULT_USERS_PAGE_LIMIT = 20
+const DefaultUsersPageLimit = 20
 
 // Service Interface for performing user operations
 type Service interface {
-	CreateUser(context context.Context, request dto.CreateUserRequest) (dto.CreateUserResponse, error)
-	GetUser(context context.Context, request dto.GetUserRequest) (dto.GetUserResponse, error)
-	GetUsers(context context.Context, request dto.GetUsersRequest) (dto.GetUsersResponse, error)
-	UpdateUser(context context.Context, request dto.UpdateUserRequest) (dto.UpdateUserResponse, error)
-	DeleteUser(context context.Context, request dto.DeleteUserRequest) (dto.DeleteUserResponse, error)
+	CreateUser(context context.Context, request *dto.CreateUserRequest) (dto.CreateUserResponse, error)
+	GetUser(context context.Context, request *dto.GetUserRequest) (dto.GetUserResponse, error)
+	GetUsers(context context.Context, request *dto.GetUsersRequest) (dto.GetUsersResponse, error)
+	UpdateUser(context context.Context, request *dto.UpdateUserRequest) (dto.UpdateUserResponse, error)
+	DeleteUser(context context.Context, request *dto.DeleteUserRequest) (dto.DeleteUserResponse, error)
 }
 
 // ServiceImpl Implementation for the Service
@@ -29,7 +30,7 @@ type ServiceImpl struct {
 // CreateUser Create a new user
 func (service *ServiceImpl) CreateUser(
 	context context.Context,
-	request dto.CreateUserRequest,
+	request *dto.CreateUserRequest,
 ) (dto.CreateUserResponse, error) {
 	params := db.CreateUserParams{
 		Username: request.Username,
@@ -53,7 +54,7 @@ func (service *ServiceImpl) CreateUser(
 }
 
 // GetUser Retrieve a user based on ID, username, or email
-func (service *ServiceImpl) GetUser(context context.Context, request dto.GetUserRequest) (
+func (service *ServiceImpl) GetUser(context context.Context, request *dto.GetUserRequest) (
 	dto.GetUserResponse,
 	error,
 ) {
@@ -98,12 +99,12 @@ func (service *ServiceImpl) GetUser(context context.Context, request dto.GetUser
 // TODO implement sorting
 func (service *ServiceImpl) GetUsers(
 	context context.Context,
-	request dto.GetUsersRequest,
+	request *dto.GetUsersRequest,
 ) (dto.GetUsersResponse, error) {
 	params := db.GetUsersParams{}
 
 	if request.Limit == nil {
-		params.Limit = DEFAULT_USERS_PAGE_LIMIT
+		params.Limit = DefaultUsersPageLimit
 	} else {
 		params.Limit = int32(*request.Limit)
 	}
@@ -134,6 +135,11 @@ func (service *ServiceImpl) GetUsers(
 		response.Users[i] = userResponse
 	}
 
+	routeUrl, err := common.GetRouteUrl(context)
+	if err != nil {
+		return dto.GetUsersResponse{}, fmt.Errorf("failed to get route url: %w", err)
+	}
+
 	if request.Offset != nil && *request.Offset > 0 {
 		prevOffset := params.Offset - params.Limit
 		if prevOffset < 0 {
@@ -141,7 +147,7 @@ func (service *ServiceImpl) GetUsers(
 		}
 		prevLink := fmt.Sprintf(
 			"%s?limit=%d&offset=%d",
-			GetRouteUrl(context),
+			routeUrl,
 			params.Limit,
 			prevOffset,
 		)
@@ -155,7 +161,7 @@ func (service *ServiceImpl) GetUsers(
 	if usersRemaining > 0 {
 		nextLink := fmt.Sprintf(
 			"%s?limit=%d&offset=%d",
-			GetRouteUrl(context),
+			routeUrl,
 			params.Limit,
 			params.Offset+params.Limit,
 		)
@@ -168,7 +174,7 @@ func (service *ServiceImpl) GetUsers(
 // UpdateUser Update a user
 func (service *ServiceImpl) UpdateUser(
 	context context.Context,
-	request dto.UpdateUserRequest,
+	request *dto.UpdateUserRequest,
 ) (dto.UpdateUserResponse, error) {
 	params := db.UpdateUserParams{
 		ID: int32(request.UserId),
@@ -221,7 +227,7 @@ func (service *ServiceImpl) UpdateUser(
 // DeleteUser Delete user
 func (service *ServiceImpl) DeleteUser(
 	context context.Context,
-	request dto.DeleteUserRequest,
+	request *dto.DeleteUserRequest,
 ) (dto.DeleteUserResponse, error) {
 	err := service.Queries.DeactivateUser(context, int32(request.UserId))
 	if err != nil {

@@ -9,10 +9,9 @@ import (
 	"user/db"
 )
 
-const USER_CLAIMS_KEY string = "user"
-
-// AuthMiddleware Validates JWT and extracts claims
-func AuthMiddleware(queries db.Queries) func(http.Handler) http.Handler {
+// authMiddleware Validates JWT and extracts claims
+// TODO move to /server/common
+func authMiddleware(queries db.Queries) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
@@ -37,7 +36,7 @@ func AuthMiddleware(queries db.Queries) func(http.Handler) http.Handler {
 					http.Error(w, err.Error(), http.StatusUnauthorized)
 				}
 
-				ctx = context.WithValue(ctx, USER_CLAIMS_KEY, claims)
+				ctx = context.WithValue(ctx, common.UsersClaimKey, claims)
 				next.ServeHTTP(w, r.WithContext(ctx))
 			},
 		)
