@@ -15,11 +15,11 @@ const DefaultUsersPageLimit = 20
 
 // Service Interface for performing user operations
 type Service interface {
-	CreateUser(context context.Context, request *dto.CreateUserRequest) (dto.CreateUserResponse, error)
-	GetUser(context context.Context, request *dto.GetUserRequest) (dto.GetUserResponse, error)
-	GetUsers(context context.Context, request *dto.GetUsersRequest) (dto.GetUsersResponse, error)
-	UpdateUser(context context.Context, request *dto.UpdateUserRequest) (dto.UpdateUserResponse, error)
-	DeleteUser(context context.Context, request *dto.DeleteUserRequest) (dto.DeleteUserResponse, error)
+	CreateUser(context context.Context, request *dto.CreateUserRequest) (*dto.CreateUserResponse, error)
+	GetUser(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error)
+	GetUsers(context context.Context, request *dto.GetUsersRequest) (*dto.GetUsersResponse, error)
+	UpdateUser(context context.Context, request *dto.UpdateUserRequest) (*dto.UpdateUserResponse, error)
+	DeleteUser(context context.Context, request *dto.DeleteUserRequest) (*dto.DeleteUserResponse, error)
 }
 
 // ServiceImpl Implementation for the Service
@@ -31,7 +31,7 @@ type ServiceImpl struct {
 func (service *ServiceImpl) CreateUser(
 	context context.Context,
 	request *dto.CreateUserRequest,
-) (dto.CreateUserResponse, error) {
+) (*dto.CreateUserResponse, error) {
 	params := db.CreateUserParams{
 		Username: request.Username,
 		Email:    request.Email,
@@ -39,23 +39,23 @@ func (service *ServiceImpl) CreateUser(
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return dto.CreateUserResponse{}, fmt.Errorf("failed to create user: failed to create password hash: %w", err)
+		return &dto.CreateUserResponse{}, fmt.Errorf("failed to create user: failed to create password hash: %w", err)
 	}
 	params.PasswordHash = string(hashedPassword)
 
 	user, err := service.Queries.CreateUser(context, params)
 	if err != nil {
-		return dto.CreateUserResponse{}, fmt.Errorf("failed to create user: %w", err)
+		return &dto.CreateUserResponse{}, fmt.Errorf("failed to create user: %w", err)
 	}
 
-	return dto.CreateUserResponse{
+	return &dto.CreateUserResponse{
 		UserId: int(user.ID),
 	}, nil
 }
 
 // GetUser Retrieve a user based on ID, username, or email
 func (service *ServiceImpl) GetUser(context context.Context, request *dto.GetUserRequest) (
-	dto.GetUserResponse,
+	*dto.GetUserResponse,
 	error,
 ) {
 	var params db.GetUserParams
@@ -80,10 +80,10 @@ func (service *ServiceImpl) GetUser(context context.Context, request *dto.GetUse
 
 	user, err := service.Queries.GetUser(context, params)
 	if err != nil {
-		return dto.GetUserResponse{}, fmt.Errorf("failed to retrieve user: %w", err)
+		return &dto.GetUserResponse{}, fmt.Errorf("failed to retrieve user: %w", err)
 	}
 
-	return dto.GetUserResponse{
+	return &dto.GetUserResponse{
 		UserId:       int(user.ID),
 		Username:     user.Username,
 		Email:        user.Email,
@@ -100,7 +100,7 @@ func (service *ServiceImpl) GetUser(context context.Context, request *dto.GetUse
 func (service *ServiceImpl) GetUsers(
 	context context.Context,
 	request *dto.GetUsersRequest,
-) (dto.GetUsersResponse, error) {
+) (*dto.GetUsersResponse, error) {
 	params := db.GetUsersParams{}
 
 	if request.Limit == nil {
@@ -118,7 +118,7 @@ func (service *ServiceImpl) GetUsers(
 	userCount, err := service.Queries.CountUsers(context)
 	users, err := service.Queries.GetUsers(context, params)
 	if err != nil {
-		return dto.GetUsersResponse{}, fmt.Errorf("failed to retrieve users: %w", err)
+		return &dto.GetUsersResponse{}, fmt.Errorf("failed to retrieve users: %w", err)
 	}
 
 	response := dto.GetUsersResponse{Users: make([]dto.GetUserResponse, len(users))}
@@ -137,7 +137,7 @@ func (service *ServiceImpl) GetUsers(
 
 	routeUrl, err := common.GetRouteUrl(context)
 	if err != nil {
-		return dto.GetUsersResponse{}, fmt.Errorf("failed to get route url: %w", err)
+		return &dto.GetUsersResponse{}, fmt.Errorf("failed to get route url: %w", err)
 	}
 
 	if request.Offset != nil && *request.Offset > 0 {
@@ -168,14 +168,14 @@ func (service *ServiceImpl) GetUsers(
 		response.NextLink = &nextLink
 	}
 
-	return response, nil
+	return &response, nil
 }
 
 // UpdateUser Update a user
 func (service *ServiceImpl) UpdateUser(
 	context context.Context,
 	request *dto.UpdateUserRequest,
-) (dto.UpdateUserResponse, error) {
+) (*dto.UpdateUserResponse, error) {
 	params := db.UpdateUserParams{
 		ID: int32(request.UserId),
 	}
@@ -197,7 +197,7 @@ func (service *ServiceImpl) UpdateUser(
 	} else {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*request.Password), bcrypt.DefaultCost)
 		if err != nil {
-			return dto.UpdateUserResponse{}, fmt.Errorf(
+			return &dto.UpdateUserResponse{}, fmt.Errorf(
 				"failed to update user: failed to create password hash: %w",
 				err,
 			)
@@ -207,10 +207,10 @@ func (service *ServiceImpl) UpdateUser(
 
 	user, err := service.Queries.UpdateUser(context, params)
 	if err != nil {
-		return dto.UpdateUserResponse{}, fmt.Errorf("failed to update user: %w", err)
+		return &dto.UpdateUserResponse{}, fmt.Errorf("failed to update user: %w", err)
 	}
 
-	response := dto.UpdateUserResponse{
+	return &dto.UpdateUserResponse{
 		UserId:       int(user.ID),
 		Username:     user.Username,
 		Email:        user.Email,
@@ -219,19 +219,17 @@ func (service *ServiceImpl) UpdateUser(
 		IsVerified:   user.IsVerified,
 		CreatedAt:    user.CreatedAt,
 		UpdatedAt:    user.UpdatedAt,
-	}
-
-	return response, nil
+	}, nil
 }
 
 // DeleteUser Delete user
 func (service *ServiceImpl) DeleteUser(
 	context context.Context,
 	request *dto.DeleteUserRequest,
-) (dto.DeleteUserResponse, error) {
+) (*dto.DeleteUserResponse, error) {
 	err := service.Queries.DeactivateUser(context, int32(request.UserId))
 	if err != nil {
-		return dto.DeleteUserResponse{}, fmt.Errorf("failed to delete user: %w", err)
+		return &dto.DeleteUserResponse{}, fmt.Errorf("failed to delete user: %w", err)
 	}
-	return dto.DeleteUserResponse{}, nil
+	return &dto.DeleteUserResponse{}, nil
 }
