@@ -44,6 +44,10 @@ func GetDatabaseConnection() (*sql.DB, error) {
 		return nil, err
 	}
 
+	if err = database.Ping(); err != nil {
+		return nil, err
+	}
+
 	return database, nil
 }
 
