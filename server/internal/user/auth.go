@@ -6,7 +6,7 @@ import (
 	"database/sql"
 	"github.com/go-chi/jwtauth/v5"
 	"net/http"
-	"user/db"
+	"user/db/generated"
 )
 
 // authMiddleware Validates JWT and extracts claims
