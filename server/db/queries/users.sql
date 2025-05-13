@@ -35,12 +35,6 @@ SET username = COALESCE(sqlc.narg(username), username),
     password_hash = COALESCE(sqlc.narg(password_hash), password_hash)
 WHERE id = $1
 RETURNING *;
--- UPDATE users
---     SET username = CASE WHEN sqlc.narg(username) IS NULL THEN username ELSE sqlc.narg(username) END,
---         email = CASE WHEN sqlc.narg(email) IS NULL THEN email ELSE sqlc.narg(email) END,
---         password_hash = CASE WHEN sqlc.narg(password_hash) IS NULL THEN password_hash ELSE sqlc.narg(password_hash) END
--- WHERE id = $1
--- RETURNING *;
 
 -- name: DeactivateUser :exec
 UPDATE users
