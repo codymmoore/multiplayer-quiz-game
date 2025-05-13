@@ -20,7 +20,7 @@ var emailRegex = regexp.MustCompile(`^[\w\-.]+@([\w-]+\.)+[\w-]{2,}$`)
 
 // ValidateCreateUserRequest Validate request for creating a new user
 // TODO: check is username or email is already being used?
-func ValidateCreateUserRequest(request dto.CreateUserRequest) error {
+func ValidateCreateUserRequest(request *dto.CreateUserRequest) error {
 	err := ValidateUsername(request.Username)
 	if err != nil {
 		return err
@@ -40,7 +40,7 @@ func ValidateCreateUserRequest(request dto.CreateUserRequest) error {
 }
 
 // ValidateGetUserRequest Validate request for retrieving a user
-func ValidateGetUserRequest(request dto.GetUserRequest) error {
+func ValidateGetUserRequest(request *dto.GetUserRequest) error {
 	if request.UserId == nil && request.Username == nil && request.Email == nil {
 		return errors.New("ID, username, or email is required")
 	}
@@ -48,7 +48,7 @@ func ValidateGetUserRequest(request dto.GetUserRequest) error {
 }
 
 // ValidateGetUsersRequest Validate request for retrieving paginated users
-func ValidateGetUsersRequest(request dto.GetUsersRequest) error {
+func ValidateGetUsersRequest(request *dto.GetUsersRequest) error {
 	userType := reflect.TypeOf(db.User{})
 
 	if request.Limit != nil && *request.Limit <= 0 {
@@ -85,7 +85,7 @@ func ValidateGetUsersRequest(request dto.GetUsersRequest) error {
 }
 
 // ValidateUpdateUserRequest Validate request for updating a user
-func ValidateUpdateUserRequest(request dto.UpdateUserRequest) error {
+func ValidateUpdateUserRequest(request *dto.UpdateUserRequest) error {
 	if request.Username != nil {
 		err := ValidateUsername(*request.Username)
 		if err != nil {

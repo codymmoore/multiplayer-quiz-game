@@ -1,3 +1,3 @@
 package common
 
-const USER_CLAIMS_KEY string = "user"
+const UsersClaimKey string = "user"
