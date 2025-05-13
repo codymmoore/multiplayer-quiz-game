@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	MIN_PASSWORD_LENGTH = 15
-	MAX_PASSWORD_LENGTH = 64
+	MinPasswordLength = 15
+	MaxPasswordLength = 64
 )
 
 var usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_-]{3,15}$`)
@@ -133,8 +133,8 @@ func ValidateEmail(email string) error {
 
 // ValidatePassword Validate a password
 func ValidatePassword(password string) error {
-	if len(password) < MIN_PASSWORD_LENGTH || len(password) > MAX_PASSWORD_LENGTH {
-		return fmt.Errorf("password must be between %d and %d characters", MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH)
+	if len(password) < MinPasswordLength || len(password) > MaxPasswordLength {
+		return fmt.Errorf("password must be between %d and %d characters", MinPasswordLength, MaxPasswordLength)
 	}
 	return nil
 }
