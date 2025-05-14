@@ -56,7 +56,7 @@ func GetCurrentUserHandler(service Service) http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
+		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			http.Error(w, `{"error":"Failed to encode response"}`, http.StatusInternalServerError)
 		}
@@ -83,7 +83,7 @@ func GetUserHandler(service Service) http.HandlerFunc {
 		}
 
 		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusCreated)
+		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(response); err != nil {
 			http.Error(w, `{"error":"Failed to encode response"}`, http.StatusInternalServerError)
 		}
@@ -148,14 +148,13 @@ func UpdateUserHandler(service Service) http.HandlerFunc {
 func DeleteUserHandler(service Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		request := dto.DeleteUserRequest{}
-		userIdStr := chi.URLParam(r, "id")
-		userId, err := strconv.Atoi(userIdStr)
+		userId, err := strconv.Atoi(chi.URLParam(r, "id"))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-
 		request.UserId = userId
+
 		response, err := service.DeleteUser(r.Context(), &request)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -230,8 +229,7 @@ func generateGetUsersRequest(r *http.Request) (*dto.GetUsersRequest, error) {
 func generateUpdateUserRequest(r *http.Request) (*dto.UpdateUserRequest, error) {
 	var request dto.UpdateUserRequest
 
-	userIdStr := chi.URLParam(r, "id")
-	userId, err := strconv.Atoi(userIdStr)
+	userId, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		return &dto.UpdateUserRequest{}, err
 	}
