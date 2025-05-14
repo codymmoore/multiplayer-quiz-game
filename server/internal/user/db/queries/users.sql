@@ -36,7 +36,6 @@ SET username = COALESCE(sqlc.narg(username), username),
 WHERE id = $1
     RETURNING *;
 
--- name: DeactivateUser :exec
-UPDATE users
-SET is_active = false
+-- name: DeleteUser :exec
+DELETE FROM users
 WHERE id = $1;
