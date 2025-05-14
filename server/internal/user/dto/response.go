@@ -13,7 +13,6 @@ type GetUserResponse struct {
 	Username     string    `json:"username"`
 	Email        string    `json:"email"`
 	PasswordHash string    `json:"passwordHash"`
-	IsActive     bool      `json:"isActive"`
 	IsVerified   bool      `json:"isVerified"`
 	CreatedAt    time.Time `json:"createdAt"`
 	UpdatedAt    time.Time `json:"updatedAt"`
@@ -30,7 +29,6 @@ type UpdateUserResponse struct {
 	Username     string    `json:"username"`
 	Email        string    `json:"email"`
 	PasswordHash string    `json:"passwordHash"`
-	IsActive     bool      `json:"isActive"`
 	IsVerified   bool      `json:"isVerified"`
 	CreatedAt    time.Time `json:"createdAt"`
 	UpdatedAt    time.Time `json:"updatedAt"`
