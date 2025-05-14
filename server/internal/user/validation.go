@@ -11,6 +11,8 @@ import (
 )
 
 const (
+	MinUsernameLength = 3
+	MaxUsernameLength = 15
 	MinPasswordLength = 15
 	MaxPasswordLength = 64
 )
@@ -112,8 +114,8 @@ func ValidateUpdateUserRequest(request *dto.UpdateUserRequest) error {
 
 // ValidateUsername Validate a username
 func ValidateUsername(username string) error {
-	if len(username) < 3 || len(username) > 15 {
-		return errors.New("username must be between 3 and 15 characters")
+	if len(username) < MinUsernameLength || len(username) > MaxUsernameLength {
+		return fmt.Errorf("username must be between %d and %d characters", MinUsernameLength, MaxUsernameLength)
 	}
 
 	if !usernameRegex.MatchString(username) {
