@@ -1,0 +1,17 @@
+replicaCount: 1
+
+image:
+  repository: codymmoore97/quizchief-user-service
+  tag: latest
+  pullPolicy: Always
+service:
+  type: NodePort
+  port: 80
+  targetPort: 8080
+ingress:
+  enabled: true
+  host: user.local
+config:
+  PORT: "8080"
+  DATABASE_DRIVER: "postgres"
+

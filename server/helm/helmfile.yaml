@@ -1,0 +1,6 @@
+releases:
+  - name: user-service
+    namespace: default
+    chart: ./helm/user-service
+    values:
+      - ./helm/user-service/values.yaml
