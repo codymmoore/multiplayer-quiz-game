@@ -9,24 +9,20 @@ FROM users
 WHERE
     (id = sqlc.narg(id) OR sqlc.narg(id) IS NULL) AND
     (username = sqlc.narg(username) OR sqlc.narg(username) IS NULL) AND
-    (email = sqlc.narg(email) OR sqlc.narg(email) IS NULL) AND
-    is_active = true
+    (email = sqlc.narg(email) OR sqlc.narg(email) IS NULL)
     LIMIT 1;
 
 -- name: GetUsers :many
 SELECT *
 FROM users
-WHERE is_active = true
-    LIMIT $1
+LIMIT $1
 OFFSET $2;
 
 -- name: CountUsers :one
 SELECT
     COUNT(*)
 FROM
-    users
-WHERE
-    is_active = true;
+    users;
 
 -- name: UpdateUser :one
 UPDATE users
