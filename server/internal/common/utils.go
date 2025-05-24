@@ -34,9 +34,9 @@ func GetDatabaseConnection() (*sql.DB, error) {
 		return nil, errors.New("DATABASE_DRIVER environment variable not set")
 	}
 
-	databaseHost := os.Getenv("DATABASE_HOST")
+	databaseHost := os.Getenv("DATABASE_URL")
 	if databaseHost == "" {
-		return nil, errors.New("DATABASE_HOST environment variable not set")
+		return nil, errors.New("DATABASE_URL environment variable not set")
 	}
 
 	database, err := sql.Open(databaseDriver, databaseHost)
