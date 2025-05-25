@@ -11,9 +11,13 @@ for SERVICE in "${SERVICES[@]}"; do
     VERSION="latest"
     HELM_PATH="./server/helm/$SERVICE"
     DOCKER_REPO="codymmoore97"
+    SERVICE_PATH="./server/internal/$SERVICE"
+
+    echo -e "Generating sqlc files for $SERVICE..."
+    sqlc generate --file $SERVICE_PATH/sqlc.yaml
 
     echo -e "Building docker image for $SERVICE..."
-    docker build -f server/internal/$SERVICE/Dockerfile -t $IMAGE_NAME:$VERSION server
+    docker build -f $SERVICE_PATH/Dockerfile -t $IMAGE_NAME:$VERSION server
     docker tag $IMAGE_NAME:$VERSION $DOCKER_REPO/$IMAGE_NAME:$VERSION
     echo -e "Pushing docker image to remote repository for $SERVICE..."
     docker push $DOCKER_REPO/$IMAGE_NAME:$VERSION
