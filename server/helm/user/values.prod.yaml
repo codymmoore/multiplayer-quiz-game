@@ -1,0 +1,17 @@
+replicaCount: 3
+image:
+  tag: stable
+  pullPolicy: Always
+service:
+  type: NodePort #ClusterIP
+  port: 80
+  targetPort: 8080
+ingress:
+  enabled: true
+  host: api.quizchief.gg
+  path: /
+  tls:
+    enabled: true
+    secretName: api-quizchief-tls
+    issureName: letsencrypt-prod
+

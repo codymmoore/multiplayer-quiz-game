@@ -1,0 +1,10 @@
+image:
+  tag: dev
+  pullPolicy: Always
+service:
+  type: NodePort
+ingress:
+  host: user.local
+  tls:
+    enabled: false
+
