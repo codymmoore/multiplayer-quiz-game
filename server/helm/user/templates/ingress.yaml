@@ -4,10 +4,12 @@ kind: Ingress
 metadata:
   name: {{ include "user-service.fullname" . }}-ingress
   annotations:
-    cert-manager.io/cluster-issuer: {{ .Values.ingress.tls.issuerName }}
+    {{- if and .Values.ingress.tls.enabled }}
+    cert-manager.io/cluster-issuer: {{ .Values.issuer.name }}
+    {{- end }}
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
-  ingressClassName: nginx
+  ingressClassName: {{ .Values.ingress.className }}
   {{- if and .Values.ingress.tls.enabled .Values.ingress.host }}
   tls:
     - hosts:
@@ -18,7 +20,7 @@ spec:
     - host: {{ .Values.ingress.host }}
       http:
         paths:
-          - path: {{ .Values.ingress.path }}
+          - path: {{ .Values.ingress.path }} #user
             pathType: Prefix
             backend:
               service:

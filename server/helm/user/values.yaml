@@ -8,6 +8,7 @@ service:
   port: 80
   targetPort: 8080
 ingress:
+  className: nginx
   enabled: true
   host: ""
   path: /

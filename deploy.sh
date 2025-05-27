@@ -37,7 +37,7 @@ for SERVICE in "${SERVICES[@]}"; do
 
     echo -e "Deploying $SERVICE..."
     helm upgrade --install $SERVICE "$HELM_PATH" --namespace $NAMESPACE --create-namespace \
-        --set image.repository="$DOCKER_REPO/$FULL_IMAGE_NAME" \
+        --set image.repository="$DOCKER_REPO/$IMAGE_NAME" \
         --set image.tag="$VERSION" \
         -f "$HELM_ENV_VALUES"
 done
