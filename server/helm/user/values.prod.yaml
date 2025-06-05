@@ -9,7 +9,7 @@ service:
 ingress:
   enabled: true
   host: api.quizchief.gg
-  path: /
+  path: /user
   tls:
     enabled: true
     secretName: api-quizchief-tls
@@ -19,4 +19,8 @@ issuer:
   server: https://acme-v02.api.letsencrypt.org/directory
   privateKeySecretName: letsencrypt-prod
   ingressClass: nginx
+  privateKeySecretName: letsencrypt-prod
+secret:
+  jwtSecret: jwt-secret-prod
+  databaseUrlSecret: database-url-secret-prod
 
