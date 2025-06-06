@@ -22,4 +22,6 @@ issuer:
 secret:
   jwtSecret: jwt-secret-prod
   databaseUrlSecret: database-url-secret-prod
+config:
+  BASE_URL: https://api.quizchief.gg
 

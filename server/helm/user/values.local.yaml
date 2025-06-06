@@ -10,4 +10,5 @@ ingress:
 secret:
   jwtSecret: jwt-secret-dev
   databaseUrlSecret: database-url-secret-dev
-
+config:
+  BASE_URL: http://user.local
