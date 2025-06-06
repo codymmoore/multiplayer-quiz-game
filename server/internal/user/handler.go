@@ -18,7 +18,7 @@ func CreateUserHandler(service Service) http.HandlerFunc {
 			return
 		}
 
-		if err := ValidateCreateUserRequest(&request); err != nil {
+		if err := ValidateCreateUserRequest(&request, service, r.Context()); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -125,7 +125,7 @@ func UpdateUserHandler(service Service) http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 		}
 
-		if err := ValidateUpdateUserRequest(request); err != nil {
+		if err := ValidateUpdateUserRequest(request, service, r.Context()); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
