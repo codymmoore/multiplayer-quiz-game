@@ -6,16 +6,9 @@ import (
 	"errors"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/jwtauth/v5"
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq" // registers "postgres" driver
 	"os"
 )
-
-// LoadEnv Load common environment file for backend services
-func LoadEnv() error {
-	err := godotenv.Load("../.env")
-	return err
-}
 
 // InitJWT Initialize the global JWTAuth instance using the JWT_SECRET environment variable
 func InitJWT() error {
