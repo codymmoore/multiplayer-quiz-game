@@ -25,7 +25,7 @@ for SERVICE in "${SERVICES[@]}"; do
     DOCKER_REPO="codymmoore97"
     HELM_ENV_VALUES="$HELM_PATH/values.$ENV.yaml"
 
-    echo -e "Pulling docker image from remote repository for $SERVICE..."
+    echo -e "Pulling $DOCKER_REPO/$FULL_IMAGE_NAME..."
     docker pull $DOCKER_REPO/$FULL_IMAGE_NAME
 
     echo -e "Deploying $SERVICE..."

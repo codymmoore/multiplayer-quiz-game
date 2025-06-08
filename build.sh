@@ -17,6 +17,6 @@ for SERVICE in "${SERVICES[@]}"; do
     echo -e "Building docker image for $SERVICE..."
     docker build --no-cache -f $SERVICE_PATH/Dockerfile -t $FULL_IMAGE_NAME server
     docker tag $FULL_IMAGE_NAME $DOCKER_REPO/$FULL_IMAGE_NAME
-    echo -e "Pushing $FULL_IMAGE_NAME to remote repository..."
+    echo -e "Pushing $DOCKER_REPO/$FULL_IMAGE_NAME..."
     docker push $DOCKER_REPO/$FULL_IMAGE_NAME
 done
