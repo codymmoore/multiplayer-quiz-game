@@ -1,7 +1,4 @@
 replicaCount: 3
-image:
-  tag: stable
-  pullPolicy: Always
 service:
   type: NodePort #ClusterIP
   port: 80

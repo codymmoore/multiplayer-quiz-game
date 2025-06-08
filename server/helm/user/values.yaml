@@ -1,7 +1,6 @@
 replicaCount: 1
 image:
   repository: codymmoore97/quizchief-user-service
-  tag: latest
   pullPolicy: Always
 service:
   type: NodePort

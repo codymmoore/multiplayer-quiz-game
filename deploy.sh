@@ -18,7 +18,7 @@ if [[ "$ENV" != "local" && "$ENV" != "prod" ]]; then
 fi
 
 for SERVICE in "${SERVICES[@]}"; do
-    IMAGE_NAME="quizchief-$SERVICE"
+    IMAGE_NAME="quizchief-$SERVICE-service"
     VERSION=$(git rev-parse --short HEAD)
     FULL_IMAGE_NAME="$IMAGE_NAME:$VERSION"
     HELM_PATH="./server/helm/$SERVICE"
@@ -33,5 +33,6 @@ for SERVICE in "${SERVICES[@]}"; do
         --set image.repository="$DOCKER_REPO/$IMAGE_NAME" \
         --set image.tag="$VERSION" \
         -f "$HELM_ENV_VALUES"
+    kubectl rollout restart deployment $SERVICE -n quizchief
 done
 

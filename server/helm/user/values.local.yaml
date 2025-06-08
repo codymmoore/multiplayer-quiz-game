@@ -1,6 +1,3 @@
-image:
-  tag: dev
-  pullPolicy: Always
 service:
   type: NodePort
 ingress:
