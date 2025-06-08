@@ -39,13 +39,13 @@ func (service *ServiceImpl) CreateUser(
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return &dto.CreateUserResponse{}, fmt.Errorf("failed to create user: failed to create password hash: %w", err)
+		return nil, fmt.Errorf("failed to create user: failed to create password hash: %w", err)
 	}
 	params.PasswordHash = string(hashedPassword)
 
 	user, err := service.Queries.CreateUser(context, params)
 	if err != nil {
-		return &dto.CreateUserResponse{}, fmt.Errorf("failed to create user: %w", err)
+		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
 	return &dto.CreateUserResponse{
@@ -80,7 +80,7 @@ func (service *ServiceImpl) GetUser(context context.Context, request *dto.GetUse
 
 	user, err := service.Queries.GetUser(context, params)
 	if err != nil {
-		return &dto.GetUserResponse{}, fmt.Errorf("failed to retrieve user: %w", err)
+		return nil, fmt.Errorf("failed to retrieve user: %w", err)
 	}
 
 	return &dto.GetUserResponse{
@@ -117,7 +117,7 @@ func (service *ServiceImpl) GetUsers(
 	userCount, err := service.Queries.CountUsers(context)
 	users, err := service.Queries.GetUsers(context, params)
 	if err != nil {
-		return &dto.GetUsersResponse{}, fmt.Errorf("failed to retrieve users: %w", err)
+		return nil, fmt.Errorf("failed to retrieve users: %w", err)
 	}
 
 	response := dto.GetUsersResponse{Users: make([]dto.GetUserResponse, len(users))}
@@ -135,7 +135,7 @@ func (service *ServiceImpl) GetUsers(
 
 	routeUrl, err := common.GetRouteUrl(context)
 	if err != nil {
-		return &dto.GetUsersResponse{}, fmt.Errorf("failed to get route url: %w", err)
+		return nil, fmt.Errorf("failed to get route url: %w", err)
 	}
 
 	if request.Offset != nil && *request.Offset > 0 {
@@ -195,7 +195,7 @@ func (service *ServiceImpl) UpdateUser(
 	} else {
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*request.Password), bcrypt.DefaultCost)
 		if err != nil {
-			return &dto.UpdateUserResponse{}, fmt.Errorf(
+			return nil, fmt.Errorf(
 				"failed to update user: failed to create password hash: %w",
 				err,
 			)
@@ -205,7 +205,7 @@ func (service *ServiceImpl) UpdateUser(
 
 	user, err := service.Queries.UpdateUser(context, params)
 	if err != nil {
-		return &dto.UpdateUserResponse{}, fmt.Errorf("failed to update user: %w", err)
+		return nil, fmt.Errorf("failed to update user: %w", err)
 	}
 
 	return &dto.UpdateUserResponse{
@@ -226,7 +226,7 @@ func (service *ServiceImpl) DeleteUser(
 ) (*dto.DeleteUserResponse, error) {
 	err := service.Queries.DeleteUser(context, int32(request.UserId))
 	if err != nil {
-		return &dto.DeleteUserResponse{}, fmt.Errorf("failed to delete user: %w", err)
+		return nil, fmt.Errorf("failed to delete user: %w", err)
 	}
 	return &dto.DeleteUserResponse{}, nil
 }
