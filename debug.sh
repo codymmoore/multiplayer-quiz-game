@@ -33,7 +33,7 @@ echo -e "Generating sqlc files for $SERVICE..."
 sqlc generate --file $SERVICE_PATH/sqlc.yaml
 
 echo -e "Building docker image for $SERVICE..."
-docker build --no-cache --build-arg DEBUG=true --target=debug -f $SERVICE_PATH/Dockerfile -t $FULL_IMAGE_NAME server
+docker build --no-cache --build-arg DEBUG=true --build-arg DEBUG_PORT=$PORT --target=debug -f $SERVICE_PATH/Dockerfile -t $FULL_IMAGE_NAME server
 docker tag $FULL_IMAGE_NAME $DOCKER_REPO/$FULL_IMAGE_NAME
 
 echo -e "Pushing $DOCKER_REPO/$FULL_IMAGE_NAME..."

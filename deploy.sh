@@ -7,13 +7,13 @@ SERVICES=("user")
 NAMESPACE=quizchief
 
 if [ -z "$1" ]; then
-    echo "Error: Environment not specified. Usage: ./deploy.sh [local|prod]"
+    echo "Usage: ./deploy.sh [local|prod]"
     exit 1
 fi
 
 ENV="$1"
 if [[ "$ENV" != "local" && "$ENV" != "prod" ]]; then
-    echo "Error: Invalid environment '$ENV'. Must be 'local' or 'prod'."
+    echo "Error: Invalid environment: '$ENV'. Must be 'local' or 'prod'."
     exit 1
 fi
 
