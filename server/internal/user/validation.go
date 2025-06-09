@@ -20,6 +20,10 @@ const (
 
 var usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_-]{3,15}$`)
 var emailRegex = regexp.MustCompile(`^[\w\-.]+@([\w-]+\.)+[\w-]{2,}$`)
+var hasUpper = regexp.MustCompile(`[A-Z]`)
+var hasLower = regexp.MustCompile(`[a-z]`)
+var hasNumber = regexp.MustCompile(`[0-9]`)
+var hasSymbol = regexp.MustCompile(`[#?!@$%^&*-]`)
 
 // ValidateCreateUserRequest Validate request for creating a new user
 func ValidateCreateUserRequest(request *dto.CreateUserRequest, service Service, context context.Context) error {
@@ -135,7 +139,7 @@ func ValidateUsername(username string, service Service, context context.Context)
 // ValidateEmail Validate an email address
 func ValidateEmail(email string, service Service, context context.Context) error {
     if !emailRegex.MatchString(email) {
-        return errors.New("invalid email")
+        return errors.New("invalid email format")
     }
 
     getUserRequest := dto.GetUserRequest{Email: &email}
@@ -153,5 +157,13 @@ func ValidatePassword(password string) error {
     if len(password) < MinPasswordLength || len(password) > MaxPasswordLength {
         return fmt.Errorf("password must be between %d and %d characters", MinPasswordLength, MaxPasswordLength)
     }
+
+    if !hasUpper.MatchString(password) || !hasLower.MatchString(password) || !hasNumber.MatchString(password) || !hasSymbol.MatchString(password) {
+        return errors.New(
+            "invalid password. Must contain at least one of the following: upper" +
+                " case English character, lower case English character, number, special character",
+        )
+    }
+
     return nil
 }
