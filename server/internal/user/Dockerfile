@@ -29,7 +29,7 @@ WORKDIR /root/
 COPY --from=builder /user-service .
 CMD ["./user-service"]
 
-FROM alpine AS debug
+FROM golang AS debug
 WORKDIR /root/
 COPY --from=builder /user-service .
 COPY --from=builder /go/bin/dlv .
