@@ -8,6 +8,12 @@ import (
 	"user/dto"
 )
 
+const (
+	ValidUsername = "test-username"
+	ValidEmail    = "test@email.com"
+	ValidPassword = "testPassword1234#?!@$%^&*-"
+)
+
 type mockService struct {
 	createUserFunc func(context context.Context, request *dto.CreateUserRequest) (*dto.CreateUserResponse, error)
 	getUserFunc    func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error)
