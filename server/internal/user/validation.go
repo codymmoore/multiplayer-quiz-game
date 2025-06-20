@@ -3,7 +3,6 @@ package user
 import (
 	"common"
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"reflect"
@@ -52,13 +51,19 @@ func ValidateGetUserRequest(request *dto.GetUserRequest) error {
 			Message:    "ID, username, or email is required",
 		}
 	}
+
+	if *request.UserId < 0 {
+		return &common.HTTPError{
+			StatusCode: http.StatusBadRequest,
+			Message:    "invalid user id",
+		}
+	}
+
 	return nil
 }
 
 // ValidateGetUsersRequest Validate request for retrieving paginated users
 func ValidateGetUsersRequest(request *dto.GetUsersRequest) error {
-	userType := reflect.TypeOf(db.User{})
-
 	if request.Limit != nil && *request.Limit <= 0 {
 		return &common.HTTPError{
 			StatusCode: http.StatusBadRequest,
@@ -73,6 +78,7 @@ func ValidateGetUsersRequest(request *dto.GetUsersRequest) error {
 		}
 	}
 
+	userType := reflect.TypeOf(db.User{})
 	if request.SortField != nil {
 		sortFieldExists := false
 		for i := 0; i < userType.NumField(); i++ {
@@ -86,7 +92,7 @@ func ValidateGetUsersRequest(request *dto.GetUsersRequest) error {
 		if !sortFieldExists {
 			return &common.HTTPError{
 				StatusCode: http.StatusBadRequest,
-				Message:    "Invalid sort field",
+				Message:    "invalid sort field",
 			}
 		}
 	}
@@ -109,7 +115,7 @@ func ValidateUpdateUserRequest(request *dto.UpdateUserRequest, service Service, 
 	if request.UserId < 0 {
 		return &common.HTTPError{
 			StatusCode: http.StatusBadRequest,
-			Message:    "Invalid user id",
+			Message:    "invalid user id",
 		}
 	}
 
@@ -117,7 +123,7 @@ func ValidateUpdateUserRequest(request *dto.UpdateUserRequest, service Service, 
 	if response, _ := service.GetUser(context, &getUserRequest); response == nil {
 		return &common.HTTPError{
 			StatusCode: http.StatusNotFound,
-			Message:    "User not found",
+			Message:    "user not found",
 		}
 	}
 
@@ -147,7 +153,7 @@ func ValidateDeleteUserRequest(request *dto.DeleteUserRequest, service Service, 
 	if request.UserId < 0 {
 		return &common.HTTPError{
 			StatusCode: http.StatusBadRequest,
-			Message:    "Invalid user id",
+			Message:    "invalid user id",
 		}
 	}
 
@@ -155,7 +161,7 @@ func ValidateDeleteUserRequest(request *dto.DeleteUserRequest, service Service, 
 	if response, _ := service.GetUser(context, &getUserRequest); response == nil {
 		return &common.HTTPError{
 			StatusCode: http.StatusNotFound,
-			Message:    "User not found",
+			Message:    "user not found",
 		}
 	}
 
@@ -178,7 +184,7 @@ func validateUsername(username string, service Service, context context.Context)
 	if !usernameRegex.MatchString(username) {
 		return &common.HTTPError{
 			StatusCode: http.StatusBadRequest,
-			Message:    "Invalid username format. username must contain only letters, numbers, underscores, and hyphens",
+			Message:    "illegal character. username must contain only letters, numbers, underscores, and hyphens",
 		}
 	}
 
@@ -198,7 +204,7 @@ func validateEmail(email string, service Service, context context.Context) error
 	if !emailRegex.MatchString(email) {
 		return &common.HTTPError{
 			StatusCode: http.StatusBadRequest,
-			Message:    "Invalid email format",
+			Message:    "invalid email format",
 		}
 	}
 
