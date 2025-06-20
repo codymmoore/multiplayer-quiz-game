@@ -13,10 +13,10 @@ type GetUserRequest struct {
 }
 
 type GetUsersRequest struct {
-	Limit     *int    `json:"limit"`
-	Offset    *int    `json:"offset"`
-	SortField *string `json:"sortField"`
-	SortOrder *string `json:"sortOrder"`
+	Limit         *int    `json:"limit"`
+	Offset        *int    `json:"offset"`
+	SortField     *string `json:"sortField"`
+	SortDirection *string `json:"sortDirection"`
 }
 
 type UpdateUserRequest struct {

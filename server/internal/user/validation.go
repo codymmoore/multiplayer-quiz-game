@@ -91,11 +91,14 @@ func ValidateGetUsersRequest(request *dto.GetUsersRequest) error {
 		}
 	}
 
-	if request.SortField != nil && (!strings.EqualFold(
-		*request.SortField,
+	if request.SortDirection != nil && (!strings.EqualFold(
+		*request.SortDirection,
 		"desc",
-	) || !strings.EqualFold(*request.SortField, "asc")) {
-		return errors.New("invalid sort direction")
+	) && !strings.EqualFold(*request.SortDirection, "asc")) {
+		return &common.HTTPError{
+			StatusCode: http.StatusBadRequest,
+			Message:    "invalid sort direction",
+		}
 	}
 
 	return nil
