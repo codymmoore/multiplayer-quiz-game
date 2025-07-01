@@ -487,3 +487,7 @@ func TestValidatePassword_MissingSymbol(t *testing.T) {
 	}
 	assertHTTPError(t, err, http.StatusBadRequest)
 }
+
+func TestValidatePassword_IllegalCharacter(t *testing.T) {
+	// TODO
+}

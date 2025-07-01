@@ -24,7 +24,7 @@ type Service interface {
 
 // ServiceImpl Implementation for the Service
 type ServiceImpl struct {
-	Queries db.Queries
+	Queries db.Querier
 }
 
 // CreateUser Create a new user

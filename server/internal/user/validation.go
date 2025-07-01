@@ -52,7 +52,7 @@ func ValidateGetUserRequest(request *dto.GetUserRequest) error {
 		}
 	}
 
-	if *request.UserId < 0 {
+	if request.UserId != nil && *request.UserId < 0 {
 		return &common.HTTPError{
 			StatusCode: http.StatusBadRequest,
 			Message:    "invalid user id",

@@ -27,6 +27,7 @@ func authMiddleware(queries db.Queries) func(http.Handler) http.Handler {
 					Email:    claimsMap["email"].(string),
 				}
 
+				// TODO call GetUser
 				params := db.GetUserParams{
 					ID:       sql.NullInt32{Int32: int32(claims.ID), Valid: true},
 					Username: sql.NullString{String: claims.Username, Valid: true},

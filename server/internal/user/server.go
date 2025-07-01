@@ -28,7 +28,7 @@ func RunServer() {
 
 	queries := db.New(database)
 	service := &ServiceImpl{
-		Queries: *queries,
+		Queries: queries,
 	}
 
 	router := chi.NewRouter()
