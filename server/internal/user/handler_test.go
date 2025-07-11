@@ -889,7 +889,7 @@ func TestGenerateGetUsersRequest_Success(t *testing.T) {
 	}
 
 	if getUserRequest == nil {
-		t.Errorf(`generateGetUserRequest(request) = "<nil>", expected non-null`)
+		t.Errorf(`generateGetUserRequest(request) = "<nil>", expected non-nil`)
 		return
 	}
 

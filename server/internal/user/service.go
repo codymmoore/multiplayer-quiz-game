@@ -115,6 +115,10 @@ func (service *ServiceImpl) GetUsers(
 	}
 
 	userCount, err := service.Queries.CountUsers(context)
+	if err != nil {
+		return nil, fmt.Errorf("failed to count users: %w", err)
+	}
+
 	users, err := service.Queries.GetUsers(context, params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to retrieve users: %w", err)
