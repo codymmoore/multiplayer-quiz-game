@@ -24,14 +24,14 @@ RUN if [ $DEBUG ]; then \
         CGO_ENABLED=0 GOOS=linux go build -o /user-service ../../cmd/user/main.go; \
     fi
 
-FROM gcr.io/distroless/static AS release
-WORKDIR /root/
-COPY --from=builder /user-service .
-CMD ["./user-service"]
-
 FROM golang AS debug
 WORKDIR /root/
 COPY --from=builder /user-service .
 COPY --from=builder /go/bin/dlv .
 EXPOSE ${DEBUG_PORT}
 CMD ["./dlv", "--listen=:2345", "--headless=true", "--api-version=2", "--accept-multiclient", "exec", "./user-service"]
+
+FROM gcr.io/distroless/static AS release
+WORKDIR /root/
+COPY --from=builder /user-service .
+CMD ["./user-service"]
