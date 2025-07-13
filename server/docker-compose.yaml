@@ -36,6 +36,10 @@ services:
     build:
       context: .
       dockerfile: internal/user/Dockerfile
+      target: ${TARGET:-release}
+      args:
+        DEBUG: ${DEBUG:-false}
+        DEBUG_PORT: ${DEBUG_PORT:-2345}
     container_name: user-service
     depends_on:
       postgres:
@@ -49,6 +53,7 @@ services:
       PORT: 8080
     ports:
       - "8080:8080"
+      - "${DEBUG_PORT:-2345}:${DEBUG_PORT:-2345}"
 
 volumes:
   pgdata:
