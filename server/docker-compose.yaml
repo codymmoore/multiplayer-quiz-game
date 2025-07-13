@@ -51,6 +51,7 @@ services:
       JWT_SECRET: quizchief_jwt_secret_local
       DATABASE_DRIVER: postgres
       PORT: 8080
+      BASE_URL: http://localhost:8080
     ports:
       - "8080:8080"
       - "${DEBUG_PORT:-2345}:${DEBUG_PORT:-2345}"
