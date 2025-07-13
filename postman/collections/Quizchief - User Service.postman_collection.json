@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "eb009ded-5b1e-4663-a547-c9f0accdb9b9",
-		"name": "User Service",
+		"name": "Quizchief - User Service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "36584833"
 	},
@@ -43,10 +43,12 @@
 									"    pm.expect(responseBody.userId).to.be.a(\"number\");\r",
 									"});\r",
 									"\r",
-									"pm.collectionVariables.set(\"userId\", responseBody.userId);\r",
-									"pm.collectionVariables.set(\"passwordHash\", responseBody.passwordHash);\r",
-									"\r",
-									"// TODO pm.setNextRequest(pm.info.requestName); // Create another user for get users pagination"
+									"const userCount = pm.variables.get(\"userCount\");\r",
+									"if (userCount) {\r",
+									"    pm.execution.setNextRequest(\"Get Users\");\r",
+									"} else {\r",
+									"    pm.collectionVariables.set(\"userId\", responseBody.userId);\r",
+									"}"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -869,190 +871,6 @@
 							"path": [
 								"user",
 								"me"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Get Users",
-			"item": [
-				{
-					"name": "Get Users",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status is 200\", () => {\r",
-									"    pm.response.to.have.status(200);\r",
-									"});\r",
-									"\r",
-									"const responseBody = pm.response.json();\r",
-									"const queryParams = pm.request.url.query;\r",
-									"\r",
-									"pm.test(\"Response is populated\", () => {\r",
-									"    pm.expect(responseBody).to.have.property(\"users\");\r",
-									"    pm.expect(responseBody.users).to.be.an(\"array\");\r",
-									"    pm.expect(responseBody.users).to.not.be.empty;\r",
-									"\r",
-									"    pm.test(\"User information is populated\", () => {\r",
-									"        const user = responseBody.users[0];\r",
-									"\r",
-									"        pm.expect(user).to.have.property(\"userId\");\r",
-									"        pm.expect(user.userId).to.be.a(\"number\");\r",
-									"\r",
-									"        pm.expect(user).to.have.property(\"username\");\r",
-									"        pm.expect(user.username).to.be.a(\"string\");\r",
-									"\r",
-									"        pm.expect(user).to.have.property(\"email\");\r",
-									"        pm.expect(user.email).to.be.a(\"string\");\r",
-									"\r",
-									"        pm.expect(user).to.have.property(\"passwordHash\");\r",
-									"        pm.expect(user.passwordHash).to.be.a(\"string\");\r",
-									"\r",
-									"        pm.expect(user).to.have.property(\"isVerified\");\r",
-									"        pm.expect(user.isVerified).to.be.a(\"boolean\");\r",
-									"\r",
-									"        pm.expect(user).to.have.property(\"createdAt\");\r",
-									"        pm.expect(user.createdAt).to.be.a(\"string\");\r",
-									"\r",
-									"        pm.expect(user).to.have.property(\"updatedAt\");\r",
-									"        pm.expect(user.createdAt).to.be.a(\"string\");\r",
-									"    });\r",
-									"});\r",
-									"\r",
-									"function getBaseUrl() {\r",
-									"    const url = pm.request.url.toString();\r",
-									"    const queryIndex = url.indexOf('?');\r",
-									"    const baseUrl = queryIndex !== -1\r",
-									"        ? url.substring(0, queryIndex)\r",
-									"        : url;     \r",
-									"    return baseUrl;\r",
-									"}"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/user/all",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"user",
-								"all"
-							],
-							"query": [
-								{
-									"key": "limit",
-									"value": "1",
-									"disabled": true
-								},
-								{
-									"key": "offset",
-									"value": "1",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get Users - Limit & Offset",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status is 200\", () => {\r",
-									"    pm.response.to.have.status(200);\r",
-									"});\r",
-									"\r",
-									"const responseBody = pm.response.json();\r",
-									"const queryParams = pm.request.url.query;\r",
-									"\r",
-									"pm.test(\"Response is populated\", () => {\r",
-									"    pm.expect(responseBody).to.have.property(\"users\");\r",
-									"    pm.expect(responseBody.users).to.be.an(\"array\");\r",
-									"    pm.expect(responseBody.users).to.not.be.empty;\r",
-									"\r",
-									"    pm.test(\"User information is populated\", () => {\r",
-									"        const user = responseBody.users[0];\r",
-									"\r",
-									"        pm.expect(user).to.have.property(\"userId\");\r",
-									"        pm.expect(user.userId).to.be.a(\"number\");\r",
-									"\r",
-									"        pm.expect(user).to.have.property(\"username\");\r",
-									"        pm.expect(user.username).to.be.a(\"string\");\r",
-									"\r",
-									"        pm.expect(user).to.have.property(\"email\");\r",
-									"        pm.expect(user.email).to.be.a(\"string\");\r",
-									"\r",
-									"        pm.expect(user).to.have.property(\"passwordHash\");\r",
-									"        pm.expect(user.passwordHash).to.be.a(\"string\");\r",
-									"\r",
-									"        pm.expect(user).to.have.property(\"isVerified\");\r",
-									"        pm.expect(user.isVerified).to.be.a(\"boolean\");\r",
-									"\r",
-									"        pm.expect(user).to.have.property(\"createdAt\");\r",
-									"        pm.expect(user.createdAt).to.be.a(\"string\");\r",
-									"\r",
-									"        pm.expect(user).to.have.property(\"updatedAt\");\r",
-									"        pm.expect(user.createdAt).to.be.a(\"string\");\r",
-									"    });\r",
-									"\r",
-									"    const limit = Number(queryParams.find(p => p.key === \"limit\"));\r",
-									"    const offset = Number(queryParams.find(p => p.key === \"offset\"));\r",
-									"    const baseUrl = getBaseUrl();\r",
-									"    \r",
-									"    pm.expect(responseBody.prevLink).to.equal(`${baseUrl}?limit=${limit}&offset=${offset - limit}`);\r",
-									"    pm.expect(responseBody.nextLink).to.equal(`${baseUrl}?limit=${limit}&offset=${offset + limit}`);\r",
-									"});\r",
-									"\r",
-									"function getBaseUrl() {\r",
-									"    const url = pm.request.url.toString();\r",
-									"    const queryIndex = url.indexOf('?');\r",
-									"    const baseUrl = queryIndex !== -1\r",
-									"        ? url.substring(0, queryIndex)\r",
-									"        : url;     \r",
-									"    return baseUrl;\r",
-									"}"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{baseUrl}}/user/all?limit=1&offset=1",
-							"host": [
-								"{{baseUrl}}"
-							],
-							"path": [
-								"user",
-								"all"
-							],
-							"query": [
-								{
-									"key": "limit",
-									"value": "1"
-								},
-								{
-									"key": "offset",
-									"value": "1"
-								}
 							]
 						}
 					},
@@ -1910,6 +1728,211 @@
 							"path": [
 								"user",
 								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Get Users",
+			"item": [
+				{
+					"name": "Get Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const responseBody = pm.response.json();\r",
+									"const queryParams = pm.request.url.query;\r",
+									"\r",
+									"pm.test(\"Response is populated\", () => {\r",
+									"    pm.expect(responseBody).to.have.property(\"users\");\r",
+									"    pm.expect(responseBody.users).to.be.an(\"array\");\r",
+									"    pm.expect(responseBody.users).to.not.be.empty;\r",
+									"\r",
+									"    pm.test(\"User information is populated\", () => {\r",
+									"        const user = responseBody.users[0];\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"userId\");\r",
+									"        pm.expect(user.userId).to.be.a(\"number\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"username\");\r",
+									"        pm.expect(user.username).to.be.a(\"string\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"email\");\r",
+									"        pm.expect(user.email).to.be.a(\"string\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"passwordHash\");\r",
+									"        pm.expect(user.passwordHash).to.be.a(\"string\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"isVerified\");\r",
+									"        pm.expect(user.isVerified).to.be.a(\"boolean\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"createdAt\");\r",
+									"        pm.expect(user.createdAt).to.be.a(\"string\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"updatedAt\");\r",
+									"        pm.expect(user.createdAt).to.be.a(\"string\");\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"const userCount = responseBody.users.length;\r",
+									"if (userCount < 3) {\r",
+									"    pm.variables.set(\"userCount\", userCount);\r",
+									"    pm.execution.setNextRequest(\"Create User\");\r",
+									"}\r",
+									"\r",
+									"function getBaseUrl() {\r",
+									"    const url = pm.request.url.toString();\r",
+									"    const queryIndex = url.indexOf('?');\r",
+									"    const baseUrl = queryIndex !== -1\r",
+									"        ? url.substring(0, queryIndex)\r",
+									"        : url;     \r",
+									"    return baseUrl;\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"all"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "offset",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Users - Limit, Offset, Sort",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const responseBody = pm.response.json();\r",
+									"const queryParams = pm.request.url.query;\r",
+									"\r",
+									"pm.test(\"Response is populated\", () => {\r",
+									"    pm.expect(responseBody).to.have.property(\"users\");\r",
+									"    pm.expect(responseBody.users).to.be.an(\"array\");\r",
+									"    pm.expect(responseBody.users).to.not.be.empty;\r",
+									"\r",
+									"    pm.test(\"User information is populated\", () => {\r",
+									"        const user = responseBody.users[0];\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"userId\");\r",
+									"        pm.expect(user.userId).to.be.a(\"number\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"username\");\r",
+									"        pm.expect(user.username).to.be.a(\"string\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"email\");\r",
+									"        pm.expect(user.email).to.be.a(\"string\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"passwordHash\");\r",
+									"        pm.expect(user.passwordHash).to.be.a(\"string\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"isVerified\");\r",
+									"        pm.expect(user.isVerified).to.be.a(\"boolean\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"createdAt\");\r",
+									"        pm.expect(user.createdAt).to.be.a(\"string\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"updatedAt\");\r",
+									"        pm.expect(user.createdAt).to.be.a(\"string\");\r",
+									"    });\r",
+									"\r",
+									"    const limit = Number(queryParams.find(p => p.key === \"limit\"));\r",
+									"    const offset = Number(queryParams.find(p => p.key === \"offset\"));\r",
+									"    const baseUrl = getBaseUrl();\r",
+									"    \r",
+									"    pm.expect(responseBody.prevLink).to.equal(`${baseUrl}?limit=${limit}&offset=${offset - limit}`);\r",
+									"    pm.expect(responseBody.nextLink).to.equal(`${baseUrl}?limit=${limit}&offset=${offset + limit}`);\r",
+									"});\r",
+									"\r",
+									"function getBaseUrl() {\r",
+									"    const url = pm.request.url.toString();\r",
+									"    const queryIndex = url.indexOf('?');\r",
+									"    const baseUrl = queryIndex !== -1\r",
+									"        ? url.substring(0, queryIndex)\r",
+									"        : url;     \r",
+									"    return baseUrl;\r",
+									"}\r",
+									"\r",
+									"// negative limit\r",
+									"// letter limit\r",
+									"// negative offset\r",
+									"// letter offset\r",
+									"// invalid sort field\r",
+									"// invalid sort direction"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user/all?limit=1&offset=1&sortField=CreatedAt&sortDirection=desc",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"all"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "1"
+								},
+								{
+									"key": "offset",
+									"value": "1"
+								},
+								{
+									"key": "sortField",
+									"value": "CreatedAt"
+								},
+								{
+									"key": "sortDirection",
+									"value": "desc"
+								}
 							]
 						}
 					},
