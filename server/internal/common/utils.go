@@ -44,11 +44,20 @@ func GetDatabaseConnection() (*sql.DB, error) {
 	return database, nil
 }
 
-// GetRouteUrl Get the base URL + route pattern for specified context
-func GetRouteUrl(context context.Context) (string, error) {
+// GetBaseUrl Get the base URL for the current service
+func GetBaseUrl() (string, error) {
 	baseUrl := os.Getenv("BASE_URL")
 	if baseUrl == "" {
 		return "", errors.New("BASE_URL environment variable not set")
+	}
+	return baseUrl, nil
+}
+
+// GetRouteUrl Get the base URL + route pattern for specified context
+func GetRouteUrl(context context.Context) (string, error) {
+	baseUrl, err := GetBaseUrl()
+	if err != nil {
+		return "", err
 	}
 	return baseUrl + GetRoutePattern(context), nil
 }
