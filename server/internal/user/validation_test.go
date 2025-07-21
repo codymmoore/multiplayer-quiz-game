@@ -489,5 +489,14 @@ func TestValidatePassword_MissingSymbol(t *testing.T) {
 }
 
 func TestValidatePassword_IllegalCharacter(t *testing.T) {
-	// TODO
+	password := ValidPassword + "😘"
+	err := validatePassword(password)
+	if err == nil {
+		t.Errorf(
+			`validatePassword("%s") = "%v", expected "password contains illegal characters"`,
+			password,
+			err,
+		)
+	}
+	assertHTTPError(t, err, http.StatusBadRequest)
 }
