@@ -39,7 +39,7 @@ func (service *ServiceImpl) CreateUser(
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create user: failed to create password hash: %w", err)
+		return nil, fmt.Errorf("failed to create password hash: %w", err)
 	}
 	params.PasswordHash = string(hashedPassword)
 
@@ -54,6 +54,7 @@ func (service *ServiceImpl) CreateUser(
 }
 
 // GetUser Retrieve a user based on ID, username, or email
+// TODO Change query to return many
 func (service *ServiceImpl) GetUser(context context.Context, request *dto.GetUserRequest) (
 	*dto.GetUserResponse,
 	error,
@@ -200,7 +201,7 @@ func (service *ServiceImpl) UpdateUser(
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(*request.Password), bcrypt.DefaultCost)
 		if err != nil {
 			return nil, fmt.Errorf(
-				"failed to update user: failed to create password hash: %w",
+				"failed to create password hash: %w",
 				err,
 			)
 		}
