@@ -1,0 +1,24 @@
+replicaCount: 3
+service:
+  type: NodePort #ClusterIP
+  port: 80
+  targetPort: 8080
+ingress:
+  enabled: true
+  host: api.quizchief.gg
+  path: /user
+  tls:
+    enabled: true
+    secretName: api-quizchief-tls
+issuer:
+  name: letsencrypt-prod
+  email: codymmoore97@gmail.com
+  server: https://acme-v02.api.letsencrypt.org/directory
+  privateKeySecretName: quizchief-tls-prod
+  ingressClass: nginx
+secret:
+  jwtSecret: jwt-secret-prod
+  databaseUrlSecret: database-url-secret-prod
+config:
+  BASE_URL: https://api.quizchief.gg
+

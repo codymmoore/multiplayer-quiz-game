@@ -1,0 +1,2178 @@
+{
+	"info": {
+		"_postman_id": "eb009ded-5b1e-4663-a547-c9f0accdb9b9",
+		"name": "Quizchief - User Service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36584833"
+	},
+	"item": [
+		{
+			"name": "Create User",
+			"item": [
+				{
+					"name": "Create User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const userIndex = Math.floor(100000 + Math.random() * 900000);//Number(pm.variables.get(\"userIndex\"));\r",
+									"const username = `testUser-${userIndex}`;\r",
+									"const email = `${username}@test.com`\r",
+									"\r",
+									"pm.collectionVariables.set(\"username\", username);\r",
+									"pm.collectionVariables.set(\"email\", email);\r",
+									"pm.collectionVariables.set(\"userIndex\", userIndex);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 201\", () => {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response contains userId\", () => {\r",
+									"    pm.expect(responseJson).to.have.property(\"userId\");\r",
+									"    pm.expect(responseJson.userId).to.be.a(\"number\");\r",
+									"});\r",
+									"\r",
+									"const userCount = pm.variables.get(\"userCount\");\r",
+									"if (userCount) {\r",
+									"    pm.execution.setNextRequest(\"Get Users\");\r",
+									"} else {\r",
+									"    pm.collectionVariables.set(\"userId\", responseJson.userId);\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{username}}\",\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"testPassword1234$\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Username - Too Short",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"1\",\r\n    \"email\": \"invalidUsername-tooShort{{$timestamp}}@gmail.com\",\r\n    \"password\": \"testPassword1234$\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Username - Too Long",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"123456789123456789\",\r\n    \"email\": \"invalidUsername-tooLong{{$timestamp}}@gmail.com\",\r\n    \"password\": \"testPassword1234$\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Username - Illegal Character",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"ieanrs$\",\r\n    \"email\": \"invalidUsername-illegalCharacter{{$timestamp}}@gmail.com\",\r\n    \"password\": \"testPassword1234$\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Username - Duplicate",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{userId}}\",\r\n    \"email\": \"invalidUsername-duplicate{{$timestamp}}@gmail.com\",\r\n    \"password\": \"testPassword1234$\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Email - Invalid Format",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{$timestamp}}\",\r\n    \"email\": \"invalidEmail\",\r\n    \"password\": \"testPassword1234$\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Email - Duplicate",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{$timestamp}}\",\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"testPassword1234$\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Password - Too Short",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{$timestamp}}\",\r\n    \"email\": \"{{$timestamp}}@gmail.com\",\r\n    \"password\": \"12345678901234\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Password - Too Long",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{$timestamp}}\",\r\n    \"email\": \"{{$timestamp}}@gmail.com\",\r\n    \"password\": \"12345678901234567890123456789012345678901234567890123456789012345\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Password - Missing Requirements",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{$timestamp}}\",\r\n    \"email\": \"{{$timestamp}}@gmail.com\",\r\n    \"password\": \"arsoiten1293478\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Get User",
+			"item": [
+				{
+					"name": "Get User By ID",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response is populated\", () => {\r",
+									"    pm.expect(responseJson).to.have.property(\"userId\");\r",
+									"    pm.expect(responseJson.userId).to.be.a(\"number\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"username\");\r",
+									"    pm.expect(responseJson.username).to.equal(pm.collectionVariables.get(\"username\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"email\");\r",
+									"    pm.expect(responseJson.email).to.equal(pm.collectionVariables.get(\"email\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"passwordHash\");\r",
+									"    pm.expect(responseJson.passwordHash).to.be.a(\"string\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"isVerified\");\r",
+									"    pm.expect(responseJson.isVerified).to.be.a(\"boolean\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"createdAt\");\r",
+									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"updatedAt\");\r",
+									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
+									"});\r",
+									"\r",
+									"pm.collectionVariables.set(\"passwordHash\", responseJson.passwordHash);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user?id={{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user"
+							],
+							"query": [
+								{
+									"key": "id",
+									"value": "{{userId}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User By Username",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response is populated\", () => {\r",
+									"    pm.expect(responseJson).to.have.property(\"userId\");\r",
+									"    pm.expect(responseJson.userId).to.be.a(\"number\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"username\");\r",
+									"    pm.expect(responseJson.username).to.equal(pm.collectionVariables.get(\"username\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"email\");\r",
+									"    pm.expect(responseJson.email).to.equal(pm.collectionVariables.get(\"email\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"passwordHash\");\r",
+									"    pm.expect(responseJson.passwordHash).to.be.a(\"string\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"isVerified\");\r",
+									"    pm.expect(responseJson.isVerified).to.be.a(\"boolean\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"createdAt\");\r",
+									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"updatedAt\");\r",
+									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user?username={{username}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user"
+							],
+							"query": [
+								{
+									"key": "username",
+									"value": "{{username}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User By Email",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response is populated\", () => {\r",
+									"    pm.expect(responseJson).to.have.property(\"userId\");\r",
+									"    pm.expect(responseJson.userId).to.be.a(\"number\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"username\");\r",
+									"    pm.expect(responseJson.username).to.equal(pm.collectionVariables.get(\"username\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"email\");\r",
+									"    pm.expect(responseJson.email).to.equal(pm.collectionVariables.get(\"email\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"passwordHash\");\r",
+									"    pm.expect(responseJson.passwordHash).to.be.a(\"string\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"isVerified\");\r",
+									"    pm.expect(responseJson.isVerified).to.be.a(\"boolean\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"createdAt\");\r",
+									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"updatedAt\");\r",
+									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user?email={{email}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "{{email}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fail - No Identifier",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Get Current User",
+			"item": [
+				{
+					"name": "Get Current User",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"coco\",\r\n    \"email\": \"coco@gmail.com\",\r\n    \"password\": \"uarhstiranarstt\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"me"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Update User",
+			"item": [
+				{
+					"name": "Update User - Username",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const requestJson = JSON.parse(pm.request.body);\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response is populated\", () => {\r",
+									"    pm.expect(responseJson).to.have.property(\"userId\");\r",
+									"    pm.expect(responseJson.userId).to.equal(pm.collectionVariables.get(\"userId\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"username\");\r",
+									"    pm.expect(responseJson.username).to.equal(requestJson.username);\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"email\");\r",
+									"    pm.expect(responseJson.email).to.equal(pm.collectionVariables.get(\"email\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"passwordHash\");\r",
+									"    pm.expect(responseJson.passwordHash).to.be.equal(pm.collectionVariables.get(\"passwordHash\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"isVerified\");\r",
+									"    pm.expect(responseJson.isVerified).to.be.a(\"boolean\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"createdAt\");\r",
+									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"updatedAt\");\r",
+									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const userIndex = Number(pm.variables.get(\"userIndex\")) + 1;\r",
+									"const username = `testUser-${userIndex}`;\r",
+									"\r",
+									"pm.collectionVariables.set(\"username\", username);\r",
+									"pm.collectionVariables.set(\"userIndex\", userIndex);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{username}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User - Email",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const requestBody = JSON.parse(pm.request.body);\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response is populated\", () => {\r",
+									"    pm.expect(responseJson).to.have.property(\"userId\");\r",
+									"    pm.expect(responseJson.userId).to.equal(pm.collectionVariables.get(\"userId\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"username\");\r",
+									"    pm.expect(responseJson.username).to.equal(pm.collectionVariables.get(\"username\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"email\");\r",
+									"    pm.expect(responseJson.email).to.equal(requestBody.email);\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"passwordHash\");\r",
+									"    pm.expect(responseJson.passwordHash).to.equal(pm.collectionVariables.get(\"passwordHash\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"isVerified\");\r",
+									"    pm.expect(responseJson.isVerified).to.be.a(\"boolean\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"createdAt\");\r",
+									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"updatedAt\");\r",
+									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const userIndex = Number(pm.variables.get(\"userIndex\"));\r",
+									"const username = `testUser-${userIndex}`;\r",
+									"const email = `${username}@test.com`\r",
+									"\r",
+									"pm.collectionVariables.set(\"email\", email);\r",
+									"pm.collectionVariables.set(\"userIndex\", userIndex + 1);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{email}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update User - Password",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const requestBody = JSON.parse(pm.request.body);\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response is populated\", () => {\r",
+									"    pm.expect(responseJson).to.have.property(\"userId\");\r",
+									"    pm.expect(responseJson.userId).to.equal(pm.collectionVariables.get(\"userId\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"username\");\r",
+									"    pm.expect(responseJson.username).to.equal(pm.collectionVariables.get(\"username\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"email\");\r",
+									"    pm.expect(responseJson.email).to.equal(pm.collectionVariables.get(\"email\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"passwordHash\");\r",
+									"    pm.expect(responseJson.passwordHash).to.not.equal(pm.collectionVariables.get(\"passwordHash\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"isVerified\");\r",
+									"    pm.expect(responseJson.isVerified).to.be.a(\"boolean\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"createdAt\");\r",
+									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"updatedAt\");\r",
+									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"password\": \"arstrartastA4!en\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fail - Nonexistent User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 404\", () => {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{$timestamp}}\",\r\n    \"email\": \"{{$timestamp}}@gmail.com\",\r\n    \"password\": \"testPassword1234$\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/9999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"9999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid User ID - Negative",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{$timestamp}}\",\r\n    \"email\": \"{{$timestamp}}@gmail.com\",\r\n    \"password\": \"testPassword1234$\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/-1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"-1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid User ID - Wrong Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{$timestamp}}\",\r\n    \"email\": \"{{$timestamp}}@gmail.com\",\r\n    \"password\": \"testPassword1234$\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/abcd",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"abcd"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Username - Too Short",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Username - Too Long",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"123456789123456789\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Username - Illegal Character",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"ieanrs$\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Username - Duplicate",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{userId}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Email - Invalid Format",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"invalidEmail\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Email - Duplicate",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{email}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Password - Too Short",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"password\": \"12345678901234\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Password - Too Long",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"password\": \"12345678901234567890123456789012345678901234567890123456789012345\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Password - Missing Requirements",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"password\": \"arsoiten1293478\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Get Users",
+			"item": [
+				{
+					"name": "Get Users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const responseJson = pm.response.json();\r",
+									"const queryParams = pm.request.url.query;\r",
+									"\r",
+									"pm.test(\"Response is populated\", () => {\r",
+									"    pm.expect(responseJson).to.have.property(\"users\");\r",
+									"    pm.expect(responseJson.users).to.be.an(\"array\");\r",
+									"    pm.expect(responseJson.users).to.not.be.empty;\r",
+									"\r",
+									"    pm.test(\"User information is populated\", () => {\r",
+									"        const user = responseJson.users[0];\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"userId\");\r",
+									"        pm.expect(user.userId).to.be.a(\"number\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"username\");\r",
+									"        pm.expect(user.username).to.be.a(\"string\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"email\");\r",
+									"        pm.expect(user.email).to.be.a(\"string\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"passwordHash\");\r",
+									"        pm.expect(user.passwordHash).to.be.a(\"string\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"isVerified\");\r",
+									"        pm.expect(user.isVerified).to.be.a(\"boolean\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"createdAt\");\r",
+									"        pm.expect(user.createdAt).to.be.a(\"string\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"updatedAt\");\r",
+									"        pm.expect(user.createdAt).to.be.a(\"string\");\r",
+									"    });\r",
+									"});\r",
+									"\r",
+									"const userCount = responseJson.users.length;\r",
+									"if (userCount < 3) {\r",
+									"    pm.variables.set(\"userCount\", userCount);\r",
+									"    pm.execution.setNextRequest(\"Create User\");\r",
+									"}\r",
+									"\r",
+									"function getBaseUrl() {\r",
+									"    const url = pm.request.url.toString();\r",
+									"    const queryIndex = url.indexOf('?');\r",
+									"    const baseUrl = queryIndex !== -1\r",
+									"        ? url.substring(0, queryIndex)\r",
+									"        : url;     \r",
+									"    return baseUrl;\r",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user/all",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"all"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "offset",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Users - Limit, Offset, Sort",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const responseJson = pm.response.json();\r",
+									"const queryParams = pm.request.url.query;\r",
+									"\r",
+									"pm.test(\"Response is populated\", () => {\r",
+									"    pm.expect(responseJson).to.have.property(\"users\");\r",
+									"    pm.expect(responseJson.users).to.be.an(\"array\");\r",
+									"    pm.expect(responseJson.users).to.not.be.empty;\r",
+									"\r",
+									"    pm.test(\"User information is populated\", () => {\r",
+									"        const user = responseJson.users[0];\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"userId\");\r",
+									"        pm.expect(user.userId).to.be.a(\"number\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"username\");\r",
+									"        pm.expect(user.username).to.be.a(\"string\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"email\");\r",
+									"        pm.expect(user.email).to.be.a(\"string\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"passwordHash\");\r",
+									"        pm.expect(user.passwordHash).to.be.a(\"string\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"isVerified\");\r",
+									"        pm.expect(user.isVerified).to.be.a(\"boolean\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"createdAt\");\r",
+									"        pm.expect(user.createdAt).to.be.a(\"string\");\r",
+									"\r",
+									"        pm.expect(user).to.have.property(\"updatedAt\");\r",
+									"        pm.expect(user.createdAt).to.be.a(\"string\");\r",
+									"    });\r",
+									"\r",
+									"    const limit = Number(queryParams.find(p => p.key === \"limit\"));\r",
+									"    const offset = Number(queryParams.find(p => p.key === \"offset\"));\r",
+									"    const baseUrl = getBaseUrl();\r",
+									"    \r",
+									"    pm.expect(responseJson.prevLink).to.equal(`${baseUrl}?limit=${limit}&offset=${offset - limit}`);\r",
+									"    pm.expect(responseJson.nextLink).to.equal(`${baseUrl}?limit=${limit}&offset=${offset + limit}`);\r",
+									"});\r",
+									"\r",
+									"function getBaseUrl() {\r",
+									"    const url = pm.request.url.toString();\r",
+									"    const queryIndex = url.indexOf('?');\r",
+									"    const baseUrl = queryIndex !== -1\r",
+									"        ? url.substring(0, queryIndex)\r",
+									"        : url;     \r",
+									"    return baseUrl;\r",
+									"}\r",
+									"\r",
+									"// negative limit\r",
+									"// letter limit\r",
+									"// negative offset\r",
+									"// letter offset\r",
+									"// invalid sort field\r",
+									"// invalid sort direction"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/user/all?limit=1&offset=1&sortField=CreatedAt&sortDirection=desc",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"all"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "1"
+								},
+								{
+									"key": "offset",
+									"value": "1"
+								},
+								{
+									"key": "sortField",
+									"value": "CreatedAt"
+								},
+								{
+									"key": "sortDirection",
+									"value": "desc"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Delete User",
+			"item": [
+				{
+					"name": "Delete User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 204\", () => {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/{{userId}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fail - Nonexistent User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 404\", () => {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/9999",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"9999"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid User ID - Negative",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/-1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"-1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid User ID - Wrong Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/abcd",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"abcd"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "userIndex",
+			"value": "0",
+			"type": "string"
+		},
+		{
+			"key": "userId",
+			"value": ""
+		},
+		{
+			"key": "email",
+			"value": ""
+		},
+		{
+			"key": "username",
+			"value": ""
+		},
+		{
+			"key": "passwordHash",
+			"value": ""
+		}
+	]
+}

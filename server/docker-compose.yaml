@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: quizchief-admin
+      POSTGRES_PASSWORD: quizchief-admin
+      POSTGRES_DB: quizchief_local
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quizchief-admin -d quizchief_local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrate-user:
+    image: golang:1.24
+    working_dir: /app
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: postgres://quizchief-admin:quizchief-admin@postgres:5432/quizchief_local?sslmode=disable
+    entrypoint: >
+      /bin/sh -c "
+        go install github.com/pressly/goose/v3/cmd/goose@latest &&
+        goose -dir internal/user/db/migrations postgres \"postgres://quizchief-admin:quizchief-admin@postgres:5432/quizchief_local?sslmode=disable\" up
+      "
+
+  user-service:
+    build:
+      context: .
+      dockerfile: internal/user/Dockerfile
+      target: ${TARGET:-release}
+      args:
+        DEBUG: ${DEBUG:-false}
+        DEBUG_PORT: ${DEBUG_PORT:-2345}
+    container_name: user-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate-user:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://quizchief-admin:quizchief-admin@postgres:5432/quizchief_local?sslmode=disable
+      JWT_SECRET: quizchief_jwt_secret_local
+      DATABASE_DRIVER: postgres
+      PORT: 8080
+      BASE_URL: http://localhost:8080
+    ports:
+      - "8080:8080"
+      - "${DEBUG_PORT:-2345}:${DEBUG_PORT:-2345}"
+
+volumes:
+  pgdata:

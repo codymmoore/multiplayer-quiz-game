@@ -1,0 +1,21 @@
+replicaCount: 1
+image:
+  repository: codymmoore97/quizchief-user-service
+  pullPolicy: Always
+service:
+  type: NodePort
+  port: 80
+  targetPort: 8080
+ingress:
+  className: nginx
+  enabled: true
+  host: ""
+  path: /
+  tls:
+    enabled: false
+    secretName: ""
+    issureName: ""
+config:
+  PORT: "8080"
+  DATABASE_DRIVER: "postgres"
+
