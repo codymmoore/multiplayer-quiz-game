@@ -23,7 +23,7 @@ cd $PROJECT_ROOT
 
 echo -e "\nRunning Postman tests..."
 for SERVICE in "${SERVICES[@]}"; do
-    echo "---------- ${SERVICES} ----------"
+    echo "---------- ${SERVICE} ----------"
     newman run "postman/collection/Quizchief - ${SERVICE^} Service.postman_collection.json" \
         --environment "postman/environment/Quizchief - Local.postman_environment.json" \
         --reporters cli,json
