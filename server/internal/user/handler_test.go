@@ -2,6 +2,7 @@ package user
 
 import (
 	"common"
+	api "common/api/user"
 	"context"
 	"encoding/json"
 	"errors"
@@ -12,16 +13,18 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"user/dto"
 )
 
 func TestCreateUserHandler_Success(t *testing.T) {
 	userId := 1
 	service := &mockService{
-		createUserFunc: func(context context.Context, request *dto.CreateUserRequest) (*dto.CreateUserResponse, error) {
-			return &dto.CreateUserResponse{UserId: userId}, nil
+		createUserFunc: func(context context.Context, request *api.CreateUserRequest) (
+			*api.CreateUserResponse,
+			error,
+		) {
+			return &api.CreateUserResponse{UserId: userId}, nil
 		},
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return nil, nil
 		},
 	}
@@ -43,7 +46,7 @@ func TestCreateUserHandler_Success(t *testing.T) {
 		t.Errorf(`recorder.Code = "%v", expected "%v"`, recorder.Code, http.StatusCreated)
 	}
 
-	var response dto.CreateUserResponse
+	var response api.CreateUserResponse
 	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
 		t.Errorf(`json.NewDecoder(recorder.Body).Decode(&response) = "%v", expected "<nil>"`, err)
 	}
@@ -55,10 +58,13 @@ func TestCreateUserHandler_Success(t *testing.T) {
 
 func TestCreateUserHandler_InvalidRequestBody(t *testing.T) {
 	service := &mockService{
-		createUserFunc: func(context context.Context, request *dto.CreateUserRequest) (*dto.CreateUserResponse, error) {
-			return &dto.CreateUserResponse{UserId: 1}, nil
+		createUserFunc: func(context context.Context, request *api.CreateUserRequest) (
+			*api.CreateUserResponse,
+			error,
+		) {
+			return &api.CreateUserResponse{UserId: 1}, nil
 		},
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return nil, nil
 		},
 	}
@@ -78,11 +84,14 @@ func TestCreateUserHandler_InvalidRequestBody(t *testing.T) {
 
 func TestCreateUserHandler_InvalidRequestObject(t *testing.T) {
 	service := &mockService{
-		createUserFunc: func(context context.Context, request *dto.CreateUserRequest) (*dto.CreateUserResponse, error) {
-			return &dto.CreateUserResponse{UserId: 1}, nil
+		createUserFunc: func(context context.Context, request *api.CreateUserRequest) (
+			*api.CreateUserResponse,
+			error,
+		) {
+			return &api.CreateUserResponse{UserId: 1}, nil
 		},
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
-			return &dto.GetUserResponse{}, nil
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+			return &api.GetUserResponse{}, nil
 		},
 	}
 
@@ -106,10 +115,13 @@ func TestCreateUserHandler_InvalidRequestObject(t *testing.T) {
 
 func TestCreateUserHandler_ServiceFailure(t *testing.T) {
 	service := &mockService{
-		createUserFunc: func(context context.Context, request *dto.CreateUserRequest) (*dto.CreateUserResponse, error) {
+		createUserFunc: func(context context.Context, request *api.CreateUserRequest) (
+			*api.CreateUserResponse,
+			error,
+		) {
 			return nil, errors.New("")
 		},
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return nil, nil
 		},
 	}
@@ -134,7 +146,7 @@ func TestCreateUserHandler_ServiceFailure(t *testing.T) {
 
 func TestGetCurrentUserHandler_Success(t *testing.T) {
 	currentTime := time.Now()
-	mockResponse := dto.GetUserResponse{
+	mockResponse := api.GetUserResponse{
 		UserId:       1,
 		Username:     ValidUsername,
 		Email:        ValidEmail,
@@ -144,7 +156,7 @@ func TestGetCurrentUserHandler_Success(t *testing.T) {
 		UpdatedAt:    currentTime,
 	}
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return &mockResponse, nil
 		},
 	}
@@ -166,7 +178,7 @@ func TestGetCurrentUserHandler_Success(t *testing.T) {
 		t.Errorf(`recorder.Code = "%v", expected "%v"`, recorder.Code, http.StatusOK)
 	}
 
-	var response dto.GetUserResponse
+	var response api.GetUserResponse
 	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
 		t.Errorf(`json.NewDecoder(recorder.Body).Decode(&response) = "%v", expected "<nil>"`, err)
 	}
@@ -175,7 +187,7 @@ func TestGetCurrentUserHandler_Success(t *testing.T) {
 
 func TestGetCurrentUserHandler_MissingUserClaims(t *testing.T) {
 	currentTime := time.Now()
-	mockResponse := dto.GetUserResponse{
+	mockResponse := api.GetUserResponse{
 		UserId:       1,
 		Username:     ValidUsername,
 		Email:        ValidEmail,
@@ -185,7 +197,7 @@ func TestGetCurrentUserHandler_MissingUserClaims(t *testing.T) {
 		UpdatedAt:    currentTime,
 	}
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return &mockResponse, nil
 		},
 	}
@@ -204,7 +216,7 @@ func TestGetCurrentUserHandler_MissingUserClaims(t *testing.T) {
 
 func TestGetCurrentUserHandler_ServiceFailure(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return nil, errors.New("")
 		},
 	}
@@ -229,7 +241,7 @@ func TestGetCurrentUserHandler_ServiceFailure(t *testing.T) {
 
 func TestGetCurrentUserHandler_UserNotFound(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return nil, nil
 		},
 	}
@@ -257,7 +269,7 @@ func TestGetUserHandler_Success(t *testing.T) {
 	username := ValidUsername
 	email := ValidEmail
 	currentTime := time.Now()
-	mockResponse := dto.GetUserResponse{
+	mockResponse := api.GetUserResponse{
 		UserId:       userId,
 		Username:     username,
 		Email:        email,
@@ -267,7 +279,7 @@ func TestGetUserHandler_Success(t *testing.T) {
 		UpdatedAt:    currentTime,
 	}
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return &mockResponse, nil
 		},
 	}
@@ -284,7 +296,7 @@ func TestGetUserHandler_Success(t *testing.T) {
 		t.Errorf(`recorder.Code = "%v", expected "%v"`, recorder.Code, http.StatusOK)
 	}
 
-	var response dto.GetUserResponse
+	var response api.GetUserResponse
 	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
 		t.Errorf(`json.NewDecoder(recorder.Body).Decode(&response) = "%v", expected "<nil>"`, err)
 	}
@@ -295,7 +307,7 @@ func TestGetUserHandler_RequestGenerationError_InvalidUserId(t *testing.T) {
 	username := ValidUsername
 	email := ValidEmail
 	currentTime := time.Now()
-	mockResponse := dto.GetUserResponse{
+	mockResponse := api.GetUserResponse{
 		UserId:       1,
 		Username:     username,
 		Email:        email,
@@ -305,7 +317,7 @@ func TestGetUserHandler_RequestGenerationError_InvalidUserId(t *testing.T) {
 		UpdatedAt:    currentTime,
 	}
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return &mockResponse, nil
 		},
 	}
@@ -328,7 +340,7 @@ func TestGetUserHandler_InvalidRequest(t *testing.T) {
 	username := ValidUsername
 	email := ValidEmail
 	currentTime := time.Now()
-	mockResponse := dto.GetUserResponse{
+	mockResponse := api.GetUserResponse{
 		UserId:       userId,
 		Username:     username,
 		Email:        email,
@@ -338,7 +350,7 @@ func TestGetUserHandler_InvalidRequest(t *testing.T) {
 		UpdatedAt:    currentTime,
 	}
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return &mockResponse, nil
 		},
 	}
@@ -358,7 +370,7 @@ func TestGetUserHandler_InvalidRequest(t *testing.T) {
 
 func TestGetUserHandler_ServiceFailure(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return nil, errors.New("")
 		},
 	}
@@ -378,7 +390,7 @@ func TestGetUserHandler_ServiceFailure(t *testing.T) {
 
 func TestGetUsersHandler_Success(t *testing.T) {
 	currentTime := time.Now()
-	mockUser := dto.User{
+	mockUser := api.User{
 		UserId:       1,
 		Username:     ValidUsername,
 		Email:        ValidEmail,
@@ -389,15 +401,18 @@ func TestGetUsersHandler_Success(t *testing.T) {
 	}
 	prevLink := "prevLink"
 	nextLink := "nextLink"
-	mockResponse := dto.GetUsersResponse{
-		Users: []dto.User{
+	mockResponse := api.GetUsersResponse{
+		Users: []api.User{
 			mockUser,
 		},
 		PrevLink: &prevLink,
 		NextLink: &nextLink,
 	}
 	service := &mockService{
-		getUsersFunc: func(context context.Context, request *dto.GetUsersRequest) (*dto.GetUsersResponse, error) {
+		getUsersFunc: func(context context.Context, request *api.GetUsersRequest) (
+			*api.GetUsersResponse,
+			error,
+		) {
 			return &mockResponse, nil
 		},
 	}
@@ -414,7 +429,7 @@ func TestGetUsersHandler_Success(t *testing.T) {
 		t.Errorf(`recorder.Code = "%v", expected "%v"`, recorder.Code, http.StatusOK)
 	}
 
-	var response dto.GetUsersResponse
+	var response api.GetUsersResponse
 	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
 		t.Errorf(`json.NewDecoder(recorder.Body).Decode(&response) = "%v", expected "<nil>"`, err)
 	}
@@ -430,7 +445,7 @@ func TestGetUsersHandler_Success(t *testing.T) {
 
 func TestGetUsersHandler_RequestGenerationError_InvalidLimit(t *testing.T) {
 	currentTime := time.Now()
-	mockUser := dto.User{
+	mockUser := api.User{
 		UserId:       1,
 		Username:     ValidUsername,
 		Email:        ValidEmail,
@@ -439,13 +454,16 @@ func TestGetUsersHandler_RequestGenerationError_InvalidLimit(t *testing.T) {
 		CreatedAt:    currentTime,
 		UpdatedAt:    currentTime,
 	}
-	mockResponse := dto.GetUsersResponse{
-		Users: []dto.User{
+	mockResponse := api.GetUsersResponse{
+		Users: []api.User{
 			mockUser,
 		},
 	}
 	service := &mockService{
-		getUsersFunc: func(context context.Context, request *dto.GetUsersRequest) (*dto.GetUsersResponse, error) {
+		getUsersFunc: func(context context.Context, request *api.GetUsersRequest) (
+			*api.GetUsersResponse,
+			error,
+		) {
 			return &mockResponse, nil
 		},
 	}
@@ -471,7 +489,7 @@ func TestGetUsersHandler_RequestGenerationError_InvalidLimit(t *testing.T) {
 
 func TestGetUsersHandler_RequestGenerationError_InvalidOffset(t *testing.T) {
 	currentTime := time.Now()
-	mockUser := dto.User{
+	mockUser := api.User{
 		UserId:       1,
 		Username:     ValidUsername,
 		Email:        ValidEmail,
@@ -480,13 +498,16 @@ func TestGetUsersHandler_RequestGenerationError_InvalidOffset(t *testing.T) {
 		CreatedAt:    currentTime,
 		UpdatedAt:    currentTime,
 	}
-	mockResponse := dto.GetUsersResponse{
-		Users: []dto.User{
+	mockResponse := api.GetUsersResponse{
+		Users: []api.User{
 			mockUser,
 		},
 	}
 	service := &mockService{
-		getUsersFunc: func(context context.Context, request *dto.GetUsersRequest) (*dto.GetUsersResponse, error) {
+		getUsersFunc: func(context context.Context, request *api.GetUsersRequest) (
+			*api.GetUsersResponse,
+			error,
+		) {
 			return &mockResponse, nil
 		},
 	}
@@ -512,7 +533,7 @@ func TestGetUsersHandler_RequestGenerationError_InvalidOffset(t *testing.T) {
 
 func TestGetUsersHandler_InvalidRequest(t *testing.T) {
 	currentTime := time.Now()
-	mockUser := dto.User{
+	mockUser := api.User{
 		UserId:       1,
 		Username:     ValidUsername,
 		Email:        ValidEmail,
@@ -521,13 +542,16 @@ func TestGetUsersHandler_InvalidRequest(t *testing.T) {
 		CreatedAt:    currentTime,
 		UpdatedAt:    currentTime,
 	}
-	mockResponse := dto.GetUsersResponse{
-		Users: []dto.User{
+	mockResponse := api.GetUsersResponse{
+		Users: []api.User{
 			mockUser,
 		},
 	}
 	service := &mockService{
-		getUsersFunc: func(context context.Context, request *dto.GetUsersRequest) (*dto.GetUsersResponse, error) {
+		getUsersFunc: func(context context.Context, request *api.GetUsersRequest) (
+			*api.GetUsersResponse,
+			error,
+		) {
 			return &mockResponse, nil
 		},
 	}
@@ -547,7 +571,10 @@ func TestGetUsersHandler_InvalidRequest(t *testing.T) {
 
 func TestGetUsersHandler_ServiceFailure(t *testing.T) {
 	service := &mockService{
-		getUsersFunc: func(context context.Context, request *dto.GetUsersRequest) (*dto.GetUsersResponse, error) {
+		getUsersFunc: func(context context.Context, request *api.GetUsersRequest) (
+			*api.GetUsersResponse,
+			error,
+		) {
 			return nil, errors.New("")
 		},
 	}
@@ -568,7 +595,7 @@ func TestGetUsersHandler_ServiceFailure(t *testing.T) {
 func TestUpdateUserHandler_Success(t *testing.T) {
 	userId := 1
 	currentTime := time.Now()
-	mockUser := dto.UpdateUserResponse{
+	mockUser := api.UpdateUserResponse{
 		UserId:       userId,
 		Username:     ValidUsername,
 		Email:        ValidEmail,
@@ -579,12 +606,15 @@ func TestUpdateUserHandler_Success(t *testing.T) {
 	}
 
 	service := &mockService{
-		updateUserFunc: func(context context.Context, request *dto.UpdateUserRequest) (*dto.UpdateUserResponse, error) {
+		updateUserFunc: func(context context.Context, request *api.UpdateUserRequest) (
+			*api.UpdateUserResponse,
+			error,
+		) {
 			return &mockUser, nil
 		},
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			if request.UserId != nil {
-				return &dto.GetUserResponse{}, nil
+				return &api.GetUserResponse{}, nil
 			} else {
 				return nil, nil
 			}
@@ -609,7 +639,7 @@ func TestUpdateUserHandler_Success(t *testing.T) {
 		t.Errorf(`recorder.Code = "%v", expected "%v"`, recorder.Code, http.StatusOK)
 	}
 
-	var response dto.UpdateUserResponse
+	var response api.UpdateUserResponse
 	if err := json.NewDecoder(recorder.Body).Decode(&response); err != nil {
 		t.Errorf(`json.NewDecoder(recorder.Body).Decode(&response) = "%v", expected "<nil>"`, err)
 	}
@@ -619,7 +649,7 @@ func TestUpdateUserHandler_Success(t *testing.T) {
 func TestUpdateUserHandler_RequestGenerationError_InvalidUserId(t *testing.T) {
 	userId := 1
 	currentTime := time.Now()
-	mockUser := dto.UpdateUserResponse{
+	mockUser := api.UpdateUserResponse{
 		UserId:       userId,
 		Username:     ValidUsername,
 		Email:        ValidEmail,
@@ -630,12 +660,15 @@ func TestUpdateUserHandler_RequestGenerationError_InvalidUserId(t *testing.T) {
 	}
 
 	service := &mockService{
-		updateUserFunc: func(context context.Context, request *dto.UpdateUserRequest) (*dto.UpdateUserResponse, error) {
+		updateUserFunc: func(context context.Context, request *api.UpdateUserRequest) (
+			*api.UpdateUserResponse,
+			error,
+		) {
 			return &mockUser, nil
 		},
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			if request.UserId != nil {
-				return &dto.GetUserResponse{}, nil
+				return &api.GetUserResponse{}, nil
 			} else {
 				return nil, nil
 			}
@@ -664,7 +697,7 @@ func TestUpdateUserHandler_RequestGenerationError_InvalidUserId(t *testing.T) {
 func TestUpdateUserHandler_RequestGenerationError_InvalidRequestBody(t *testing.T) {
 	userId := 1
 	currentTime := time.Now()
-	mockUser := dto.UpdateUserResponse{
+	mockUser := api.UpdateUserResponse{
 		UserId:       userId,
 		Username:     ValidUsername,
 		Email:        ValidEmail,
@@ -675,12 +708,15 @@ func TestUpdateUserHandler_RequestGenerationError_InvalidRequestBody(t *testing.
 	}
 
 	service := &mockService{
-		updateUserFunc: func(context context.Context, request *dto.UpdateUserRequest) (*dto.UpdateUserResponse, error) {
+		updateUserFunc: func(context context.Context, request *api.UpdateUserRequest) (
+			*api.UpdateUserResponse,
+			error,
+		) {
 			return &mockUser, nil
 		},
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			if request.UserId != nil {
-				return &dto.GetUserResponse{}, nil
+				return &api.GetUserResponse{}, nil
 			} else {
 				return nil, nil
 			}
@@ -704,7 +740,7 @@ func TestUpdateUserHandler_RequestGenerationError_InvalidRequestBody(t *testing.
 func TestUpdateUserHandler_InvalidRequest(t *testing.T) {
 	userId := -1
 	currentTime := time.Now()
-	mockUser := dto.UpdateUserResponse{
+	mockUser := api.UpdateUserResponse{
 		UserId:       userId,
 		Username:     ValidUsername,
 		Email:        ValidEmail,
@@ -715,12 +751,15 @@ func TestUpdateUserHandler_InvalidRequest(t *testing.T) {
 	}
 
 	service := &mockService{
-		updateUserFunc: func(context context.Context, request *dto.UpdateUserRequest) (*dto.UpdateUserResponse, error) {
+		updateUserFunc: func(context context.Context, request *api.UpdateUserRequest) (
+			*api.UpdateUserResponse,
+			error,
+		) {
 			return &mockUser, nil
 		},
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			if request.UserId != nil {
-				return &dto.GetUserResponse{}, nil
+				return &api.GetUserResponse{}, nil
 			} else {
 				return nil, nil
 			}
@@ -749,12 +788,15 @@ func TestUpdateUserHandler_InvalidRequest(t *testing.T) {
 func TestUpdateUserHandler_ServiceFailure(t *testing.T) {
 	userId := 1
 	service := &mockService{
-		updateUserFunc: func(context context.Context, request *dto.UpdateUserRequest) (*dto.UpdateUserResponse, error) {
+		updateUserFunc: func(context context.Context, request *api.UpdateUserRequest) (
+			*api.UpdateUserResponse,
+			error,
+		) {
 			return nil, errors.New("")
 		},
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			if request.UserId != nil {
-				return &dto.GetUserResponse{}, nil
+				return &api.GetUserResponse{}, nil
 			} else {
 				return nil, nil
 			}
@@ -783,11 +825,14 @@ func TestUpdateUserHandler_ServiceFailure(t *testing.T) {
 func TestDeleteUserHandler_Success(t *testing.T) {
 	userId := 1
 	service := &mockService{
-		deleteUserFunc: func(context context.Context, request *dto.DeleteUserRequest) (*dto.DeleteUserResponse, error) {
-			return &dto.DeleteUserResponse{}, nil
+		deleteUserFunc: func(context context.Context, request *api.DeleteUserRequest) (
+			*api.DeleteUserResponse,
+			error,
+		) {
+			return &api.DeleteUserResponse{}, nil
 		},
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
-			return &dto.GetUserResponse{}, nil
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+			return &api.GetUserResponse{}, nil
 		},
 	}
 
@@ -806,11 +851,14 @@ func TestDeleteUserHandler_Success(t *testing.T) {
 
 func TestDeleteUserHandler_RequestGenerationError_InvalidUserId(t *testing.T) {
 	service := &mockService{
-		deleteUserFunc: func(context context.Context, request *dto.DeleteUserRequest) (*dto.DeleteUserResponse, error) {
-			return &dto.DeleteUserResponse{}, nil
+		deleteUserFunc: func(context context.Context, request *api.DeleteUserRequest) (
+			*api.DeleteUserResponse,
+			error,
+		) {
+			return &api.DeleteUserResponse{}, nil
 		},
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
-			return &dto.GetUserResponse{}, nil
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+			return &api.GetUserResponse{}, nil
 		},
 	}
 
@@ -830,11 +878,14 @@ func TestDeleteUserHandler_RequestGenerationError_InvalidUserId(t *testing.T) {
 func TestDeleteUserHandler_InvalidRequest(t *testing.T) {
 	userId := -1
 	service := &mockService{
-		deleteUserFunc: func(context context.Context, request *dto.DeleteUserRequest) (*dto.DeleteUserResponse, error) {
-			return &dto.DeleteUserResponse{}, nil
+		deleteUserFunc: func(context context.Context, request *api.DeleteUserRequest) (
+			*api.DeleteUserResponse,
+			error,
+		) {
+			return &api.DeleteUserResponse{}, nil
 		},
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
-			return &dto.GetUserResponse{}, nil
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+			return &api.GetUserResponse{}, nil
 		},
 	}
 
@@ -854,11 +905,14 @@ func TestDeleteUserHandler_InvalidRequest(t *testing.T) {
 func TestDeleteUserHandler_ServiceFailure(t *testing.T) {
 	userId := 1
 	service := &mockService{
-		deleteUserFunc: func(context context.Context, request *dto.DeleteUserRequest) (*dto.DeleteUserResponse, error) {
+		deleteUserFunc: func(context context.Context, request *api.DeleteUserRequest) (
+			*api.DeleteUserResponse,
+			error,
+		) {
 			return nil, errors.New("")
 		},
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
-			return &dto.GetUserResponse{}, nil
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+			return &api.GetUserResponse{}, nil
 		},
 	}
 
@@ -906,7 +960,7 @@ func TestGenerateGetUsersRequest_Success(t *testing.T) {
 	}
 }
 
-func assertUserEqual(t *testing.T, actual *dto.User, expected *dto.User) {
+func assertUserEqual(t *testing.T, actual *api.User, expected *api.User) {
 	if actual.UserId != expected.UserId {
 		t.Errorf(`actual.UserId = "%d", expected "%d"`, actual.UserId, expected.UserId)
 	}

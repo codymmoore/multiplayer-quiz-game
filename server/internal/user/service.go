@@ -3,23 +3,23 @@ package user
 
 import (
 	"common"
+	api "common/api/user"
 	"context"
 	"database/sql"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"user/db/generated"
-	"user/dto"
 )
 
 const DefaultUsersPageLimit = 20
 
 // Service Interface for performing user operations
 type Service interface {
-	CreateUser(context context.Context, request *dto.CreateUserRequest) (*dto.CreateUserResponse, error)
-	GetUser(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error)
-	GetUsers(context context.Context, request *dto.GetUsersRequest) (*dto.GetUsersResponse, error)
-	UpdateUser(context context.Context, request *dto.UpdateUserRequest) (*dto.UpdateUserResponse, error)
-	DeleteUser(context context.Context, request *dto.DeleteUserRequest) (*dto.DeleteUserResponse, error)
+	CreateUser(context context.Context, request *api.CreateUserRequest) (*api.CreateUserResponse, error)
+	GetUser(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error)
+	GetUsers(context context.Context, request *api.GetUsersRequest) (*api.GetUsersResponse, error)
+	UpdateUser(context context.Context, request *api.UpdateUserRequest) (*api.UpdateUserResponse, error)
+	DeleteUser(context context.Context, request *api.DeleteUserRequest) (*api.DeleteUserResponse, error)
 }
 
 // ServiceImpl Implementation for the Service
@@ -30,8 +30,8 @@ type ServiceImpl struct {
 // CreateUser Create a new user
 func (service *ServiceImpl) CreateUser(
 	context context.Context,
-	request *dto.CreateUserRequest,
-) (*dto.CreateUserResponse, error) {
+	request *api.CreateUserRequest,
+) (*api.CreateUserResponse, error) {
 	params := db.CreateUserParams{
 		Username: request.Username,
 		Email:    request.Email,
@@ -48,15 +48,15 @@ func (service *ServiceImpl) CreateUser(
 		return nil, fmt.Errorf("failed to create user: %w", err)
 	}
 
-	return &dto.CreateUserResponse{
+	return &api.CreateUserResponse{
 		UserId: int(user.ID),
 	}, nil
 }
 
 // GetUser Retrieve a user based on ID, username, or email
 // TODO Change query to return many
-func (service *ServiceImpl) GetUser(context context.Context, request *dto.GetUserRequest) (
-	*dto.GetUserResponse,
+func (service *ServiceImpl) GetUser(context context.Context, request *api.GetUserRequest) (
+	*api.GetUserResponse,
 	error,
 ) {
 	var params db.GetUserParams
@@ -84,7 +84,7 @@ func (service *ServiceImpl) GetUser(context context.Context, request *dto.GetUse
 		return nil, fmt.Errorf("failed to retrieve user: %w", err)
 	}
 
-	return &dto.GetUserResponse{
+	return &api.GetUserResponse{
 		UserId:       int(user.ID),
 		Username:     user.Username,
 		Email:        user.Email,
@@ -99,8 +99,8 @@ func (service *ServiceImpl) GetUser(context context.Context, request *dto.GetUse
 // TODO implement sorting
 func (service *ServiceImpl) GetUsers(
 	context context.Context,
-	request *dto.GetUsersRequest,
-) (*dto.GetUsersResponse, error) {
+	request *api.GetUsersRequest,
+) (*api.GetUsersResponse, error) {
 	params := db.GetUsersParams{}
 
 	if request.Limit == nil {
@@ -125,9 +125,9 @@ func (service *ServiceImpl) GetUsers(
 		return nil, fmt.Errorf("failed to retrieve users: %w", err)
 	}
 
-	response := dto.GetUsersResponse{Users: make([]dto.GetUserResponse, len(users))}
+	response := api.GetUsersResponse{Users: make([]api.GetUserResponse, len(users))}
 	for i, user := range users {
-		response.Users[i] = dto.GetUserResponse{
+		response.Users[i] = api.GetUserResponse{
 			UserId:       int(user.ID),
 			Username:     user.Username,
 			Email:        user.Email,
@@ -177,8 +177,8 @@ func (service *ServiceImpl) GetUsers(
 // UpdateUser Update a user
 func (service *ServiceImpl) UpdateUser(
 	context context.Context,
-	request *dto.UpdateUserRequest,
-) (*dto.UpdateUserResponse, error) {
+	request *api.UpdateUserRequest,
+) (*api.UpdateUserResponse, error) {
 	params := db.UpdateUserParams{
 		ID: int32(request.UserId),
 	}
@@ -213,7 +213,7 @@ func (service *ServiceImpl) UpdateUser(
 		return nil, fmt.Errorf("failed to update user: %w", err)
 	}
 
-	return &dto.UpdateUserResponse{
+	return &api.UpdateUserResponse{
 		UserId:       int(user.ID),
 		Username:     user.Username,
 		Email:        user.Email,
@@ -227,11 +227,11 @@ func (service *ServiceImpl) UpdateUser(
 // DeleteUser Delete user
 func (service *ServiceImpl) DeleteUser(
 	context context.Context,
-	request *dto.DeleteUserRequest,
-) (*dto.DeleteUserResponse, error) {
+	request *api.DeleteUserRequest,
+) (*api.DeleteUserResponse, error) {
 	err := service.Queries.DeleteUser(context, int32(request.UserId))
 	if err != nil {
 		return nil, fmt.Errorf("failed to delete user: %w", err)
 	}
-	return &dto.DeleteUserResponse{}, nil
+	return &api.DeleteUserResponse{}, nil
 }

@@ -1,19 +1,19 @@
 package user
 
 import (
+	api "common/api/user"
 	"context"
 	"net/http"
 	"testing"
-	"user/dto"
 )
 
 func TestValidateCreateUserRequest_Success(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return nil, nil
 		},
 	}
-	request := dto.CreateUserRequest{
+	request := api.CreateUserRequest{
 		Username: ValidUsername,
 		Email:    ValidEmail,
 		Password: ValidPassword,
@@ -29,7 +29,7 @@ func TestValidateGetUserRequest_Success(t *testing.T) {
 	username := ValidUsername
 	email := ValidEmail
 
-	request := dto.GetUserRequest{
+	request := api.GetUserRequest{
 		UserId:   &userId,
 		Username: &username,
 		Email:    &email,
@@ -41,7 +41,7 @@ func TestValidateGetUserRequest_Success(t *testing.T) {
 }
 
 func TestValidateGetUserRequest_MissingParameter(t *testing.T) {
-	request := dto.GetUserRequest{}
+	request := api.GetUserRequest{}
 	err := ValidateGetUserRequest(&request)
 	if err == nil {
 		t.Errorf(`ValidateGetUserRequest(&request) = "%v", expected "ID, username, or email is required"`, err)
@@ -51,7 +51,7 @@ func TestValidateGetUserRequest_MissingParameter(t *testing.T) {
 
 func TestValidateGetUserRequest_InvalidUserId(t *testing.T) {
 	userId := -1
-	request := dto.GetUserRequest{
+	request := api.GetUserRequest{
 		UserId: &userId,
 	}
 
@@ -68,7 +68,7 @@ func TestValidateGetUsersRequest_Success(t *testing.T) {
 	sortField := "CreatedAt"
 	sortDirection := "desc"
 
-	request := dto.GetUsersRequest{
+	request := api.GetUsersRequest{
 		Limit:         &limit,
 		Offset:        &offset,
 		SortField:     &sortField,
@@ -83,7 +83,7 @@ func TestValidateGetUsersRequest_Success(t *testing.T) {
 func TestValidateGetUsersRequest_InvalidLimit(t *testing.T) {
 	limit := -1
 
-	request := dto.GetUsersRequest{
+	request := api.GetUsersRequest{
 		Limit: &limit,
 	}
 
@@ -97,7 +97,7 @@ func TestValidateGetUsersRequest_InvalidLimit(t *testing.T) {
 func TestValidateGetUsersRequest_InvalidOffset(t *testing.T) {
 	offset := -1
 
-	request := dto.GetUsersRequest{
+	request := api.GetUsersRequest{
 		Offset: &offset,
 	}
 
@@ -111,7 +111,7 @@ func TestValidateGetUsersRequest_InvalidOffset(t *testing.T) {
 func TestValidateGetUsersRequest_InvalidSortField(t *testing.T) {
 	sortField := "invalidField"
 
-	request := dto.GetUsersRequest{
+	request := api.GetUsersRequest{
 		SortField: &sortField,
 	}
 
@@ -125,7 +125,7 @@ func TestValidateGetUsersRequest_InvalidSortField(t *testing.T) {
 func TestValidateGetUsersRequest_InvalidSortDirection(t *testing.T) {
 	sortDirection := "invalidDirection"
 
-	request := dto.GetUsersRequest{
+	request := api.GetUsersRequest{
 		SortDirection: &sortDirection,
 	}
 
@@ -138,9 +138,9 @@ func TestValidateGetUsersRequest_InvalidSortDirection(t *testing.T) {
 
 func TestValidateUpdateUserRequest_Success(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			if request.UserId != nil {
-				return &dto.GetUserResponse{}, nil
+				return &api.GetUserResponse{}, nil
 			}
 			return nil, nil
 		},
@@ -150,7 +150,7 @@ func TestValidateUpdateUserRequest_Success(t *testing.T) {
 	email := ValidEmail
 	password := ValidPassword
 
-	request := dto.UpdateUserRequest{
+	request := api.UpdateUserRequest{
 		UserId:   1,
 		Username: &username,
 		Email:    &email,
@@ -164,9 +164,9 @@ func TestValidateUpdateUserRequest_Success(t *testing.T) {
 
 func TestValidateUpdateUserRequest_InvalidUserId(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			if request.UserId != nil {
-				return &dto.GetUserResponse{}, nil
+				return &api.GetUserResponse{}, nil
 			}
 			return nil, nil
 		},
@@ -176,7 +176,7 @@ func TestValidateUpdateUserRequest_InvalidUserId(t *testing.T) {
 	email := ValidEmail
 	password := ValidPassword
 
-	request := dto.UpdateUserRequest{
+	request := api.UpdateUserRequest{
 		UserId:   -1,
 		Username: &username,
 		Email:    &email,
@@ -192,7 +192,7 @@ func TestValidateUpdateUserRequest_InvalidUserId(t *testing.T) {
 
 func TestValidateUpdateUserRequest_UserNotFound(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return nil, nil
 		},
 	}
@@ -201,7 +201,7 @@ func TestValidateUpdateUserRequest_UserNotFound(t *testing.T) {
 	email := ValidEmail
 	password := ValidPassword
 
-	request := dto.UpdateUserRequest{
+	request := api.UpdateUserRequest{
 		UserId:   1,
 		Username: &username,
 		Email:    &email,
@@ -217,12 +217,12 @@ func TestValidateUpdateUserRequest_UserNotFound(t *testing.T) {
 
 func TestValidateDeleteUserRequest_Success(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
-			return &dto.GetUserResponse{}, nil
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+			return &api.GetUserResponse{}, nil
 		},
 	}
 
-	request := dto.DeleteUserRequest{
+	request := api.DeleteUserRequest{
 		UserId: 1,
 	}
 
@@ -233,12 +233,12 @@ func TestValidateDeleteUserRequest_Success(t *testing.T) {
 
 func TestValidateDeleteUserRequest_InvalidUserId(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
-			return &dto.GetUserResponse{}, nil
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+			return &api.GetUserResponse{}, nil
 		},
 	}
 
-	request := dto.DeleteUserRequest{
+	request := api.DeleteUserRequest{
 		UserId: -1,
 	}
 
@@ -251,12 +251,12 @@ func TestValidateDeleteUserRequest_InvalidUserId(t *testing.T) {
 
 func TestValidateDeleteUserRequest_UserNotFound(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return nil, nil
 		},
 	}
 
-	request := dto.DeleteUserRequest{
+	request := api.DeleteUserRequest{
 		UserId: 1,
 	}
 
@@ -269,7 +269,7 @@ func TestValidateDeleteUserRequest_UserNotFound(t *testing.T) {
 
 func TestValidateUsername_Success(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return nil, nil
 		},
 	}
@@ -282,7 +282,7 @@ func TestValidateUsername_Success(t *testing.T) {
 
 func TestValidateUsername_Short(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return nil, nil
 		},
 	}
@@ -303,7 +303,7 @@ func TestValidateUsername_Short(t *testing.T) {
 
 func TestValidateUsername_Long(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return nil, nil
 		},
 	}
@@ -324,7 +324,7 @@ func TestValidateUsername_Long(t *testing.T) {
 
 func TestValidateUsername_IllegalCharacter(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return nil, nil
 		},
 	}
@@ -343,8 +343,8 @@ func TestValidateUsername_IllegalCharacter(t *testing.T) {
 
 func TestValidateUsername_Duplicate(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
-			return &dto.GetUserResponse{}, nil
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+			return &api.GetUserResponse{}, nil
 		},
 	}
 
@@ -358,7 +358,7 @@ func TestValidateUsername_Duplicate(t *testing.T) {
 
 func TestValidateEmail_Success(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return nil, nil
 		},
 	}
@@ -371,7 +371,7 @@ func TestValidateEmail_Success(t *testing.T) {
 
 func TestValidateEmail_Format(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
 			return nil, nil
 		},
 	}
@@ -386,8 +386,8 @@ func TestValidateEmail_Format(t *testing.T) {
 
 func TestValidateEmail_Duplicate(t *testing.T) {
 	service := &mockService{
-		getUserFunc: func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
-			return &dto.GetUserResponse{}, nil
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+			return &api.GetUserResponse{}, nil
 		},
 	}
 

@@ -2,10 +2,10 @@ package user
 
 import (
 	"common"
+	api "common/api/user"
 	"context"
 	"errors"
 	"testing"
-	"user/dto"
 )
 
 const (
@@ -15,37 +15,52 @@ const (
 )
 
 type mockService struct {
-	createUserFunc func(context context.Context, request *dto.CreateUserRequest) (*dto.CreateUserResponse, error)
-	getUserFunc    func(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error)
-	getUsersFunc   func(context context.Context, request *dto.GetUsersRequest) (*dto.GetUsersResponse, error)
-	updateUserFunc func(context context.Context, request *dto.UpdateUserRequest) (*dto.UpdateUserResponse, error)
-	deleteUserFunc func(context context.Context, request *dto.DeleteUserRequest) (*dto.DeleteUserResponse, error)
+	createUserFunc func(context context.Context, request *api.CreateUserRequest) (
+		*api.CreateUserResponse,
+		error,
+	)
+	getUserFunc    func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error)
+	getUsersFunc   func(context context.Context, request *api.GetUsersRequest) (*api.GetUsersResponse, error)
+	updateUserFunc func(context context.Context, request *api.UpdateUserRequest) (
+		*api.UpdateUserResponse,
+		error,
+	)
+	deleteUserFunc func(context context.Context, request *api.DeleteUserRequest) (
+		*api.DeleteUserResponse,
+		error,
+	)
 }
 
-func (m *mockService) CreateUser(context context.Context, request *dto.CreateUserRequest) (
-	*dto.CreateUserResponse,
+func (m *mockService) CreateUser(context context.Context, request *api.CreateUserRequest) (
+	*api.CreateUserResponse,
 	error,
 ) {
 	return m.createUserFunc(context, request)
 }
 
-func (m *mockService) GetUser(context context.Context, request *dto.GetUserRequest) (*dto.GetUserResponse, error) {
+func (m *mockService) GetUser(context context.Context, request *api.GetUserRequest) (
+	*api.GetUserResponse,
+	error,
+) {
 	return m.getUserFunc(context, request)
 }
 
-func (m *mockService) GetUsers(ctx context.Context, request *dto.GetUsersRequest) (*dto.GetUsersResponse, error) {
+func (m *mockService) GetUsers(ctx context.Context, request *api.GetUsersRequest) (
+	*api.GetUsersResponse,
+	error,
+) {
 	return m.getUsersFunc(ctx, request)
 }
 
-func (m *mockService) UpdateUser(context context.Context, request *dto.UpdateUserRequest) (
-	*dto.UpdateUserResponse,
+func (m *mockService) UpdateUser(context context.Context, request *api.UpdateUserRequest) (
+	*api.UpdateUserResponse,
 	error,
 ) {
 	return m.updateUserFunc(context, request)
 }
 
-func (m *mockService) DeleteUser(context context.Context, request *dto.DeleteUserRequest) (
-	*dto.DeleteUserResponse,
+func (m *mockService) DeleteUser(context context.Context, request *api.DeleteUserRequest) (
+	*api.DeleteUserResponse,
 	error,
 ) {
 	return m.deleteUserFunc(context, request)

@@ -2,18 +2,18 @@ package user
 
 import (
 	"common"
+	api "common/api/user"
 	"encoding/json"
 	"errors"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 	"strconv"
-	"user/dto"
 )
 
 // CreateUserHandler Handler function for create user endpoint
 func CreateUserHandler(service Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var request dto.CreateUserRequest
+		var request api.CreateUserRequest
 		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 			handleError(err, w)
 			return
@@ -47,7 +47,7 @@ func GetCurrentUserHandler(service Service) http.HandlerFunc {
 			return
 		}
 
-		request := dto.GetUserRequest{
+		request := api.GetUserRequest{
 			UserId: &userClaims.ID,
 		}
 
@@ -181,9 +181,9 @@ func DeleteUserHandler(service Service) http.HandlerFunc {
 }
 
 // generateGetUserRequest Populate and return GetUserRequest
-func generateGetUserRequest(r *http.Request) (*dto.GetUserRequest, error) {
+func generateGetUserRequest(r *http.Request) (*api.GetUserRequest, error) {
 	query := r.URL.Query()
-	var request dto.GetUserRequest
+	var request api.GetUserRequest
 
 	if userIdStr := query.Get("id"); userIdStr != "" {
 		userId, err := strconv.Atoi(userIdStr)
@@ -208,9 +208,9 @@ func generateGetUserRequest(r *http.Request) (*dto.GetUserRequest, error) {
 }
 
 // generateGetUsersRequest Populate and return GetUsersRequest
-func generateGetUsersRequest(r *http.Request) (*dto.GetUsersRequest, error) {
+func generateGetUsersRequest(r *http.Request) (*api.GetUsersRequest, error) {
 	query := r.URL.Query()
-	var request dto.GetUsersRequest
+	var request api.GetUsersRequest
 
 	if limitStr := query.Get("limit"); limitStr != "" {
 		limit, err := strconv.Atoi(limitStr)
@@ -246,8 +246,8 @@ func generateGetUsersRequest(r *http.Request) (*dto.GetUsersRequest, error) {
 }
 
 // generateUpdateUserRequest Populate and return UpdateUserRequest
-func generateUpdateUserRequest(r *http.Request) (*dto.UpdateUserRequest, error) {
-	var request dto.UpdateUserRequest
+func generateUpdateUserRequest(r *http.Request) (*api.UpdateUserRequest, error) {
+	var request api.UpdateUserRequest
 
 	userId, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
@@ -269,8 +269,8 @@ func generateUpdateUserRequest(r *http.Request) (*dto.UpdateUserRequest, error) 
 }
 
 // generateDeleteUserRequest Populate and return DeleteUserRequest
-func generateDeleteUserRequest(r *http.Request) (*dto.DeleteUserRequest, error) {
-	var request dto.DeleteUserRequest
+func generateDeleteUserRequest(r *http.Request) (*api.DeleteUserRequest, error) {
+	var request api.DeleteUserRequest
 
 	userId, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
