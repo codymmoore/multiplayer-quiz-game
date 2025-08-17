@@ -53,7 +53,7 @@ func (service *ServiceImpl) CreateUser(
 	}, nil
 }
 
-// GetUser Retrieve a user based on ID, username, or email
+// GetUser Retrieve a user by ID, username, and/or email
 // TODO Change query to return many
 func (service *ServiceImpl) GetUser(context context.Context, request *api.GetUserRequest) (
 	*api.GetUserResponse,

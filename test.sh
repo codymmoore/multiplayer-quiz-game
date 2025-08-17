@@ -5,13 +5,14 @@ PROJECT_ROOT="$(pwd)"
 SERVICES=("user")
 
 echo "Running unit tests..."
-for SERVICE in "${SERVICES[@]}"; do
+
+for SERVICE in "common" "${SERVICES[@]}"; do
     SERVICE_PATH="./server/internal/$SERVICE"
 
     cd $SERVICE_PATH
 
     echo "---------- ${SERVICES} ----------"
-    go test -v
+    go test -v ./...
 
     cd $PROJECT_ROOT
 done

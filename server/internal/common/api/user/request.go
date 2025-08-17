@@ -20,7 +20,7 @@ type GetUsersRequest struct {
 }
 
 type UpdateUserRequest struct {
-	UserId   int     `json:"userId"`
+	UserId   int
 	Username *string `json:"username"`
 	Email    *string `json:"email"`
 	Password *string `json:"password"`

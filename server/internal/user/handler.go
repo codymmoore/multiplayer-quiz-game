@@ -185,7 +185,7 @@ func generateGetUserRequest(r *http.Request) (*api.GetUserRequest, error) {
 	query := r.URL.Query()
 	var request api.GetUserRequest
 
-	if userIdStr := query.Get("id"); userIdStr != "" {
+	if userIdStr := query.Get(api.UserIdKey); userIdStr != "" {
 		userId, err := strconv.Atoi(userIdStr)
 		if err != nil {
 			return nil, &common.HTTPError{
@@ -196,11 +196,11 @@ func generateGetUserRequest(r *http.Request) (*api.GetUserRequest, error) {
 		request.UserId = &userId
 	}
 
-	if username := query.Get("username"); username != "" {
+	if username := query.Get(api.UsernameKey); username != "" {
 		request.Username = &username
 	}
 
-	if email := query.Get("email"); email != "" {
+	if email := query.Get(api.EmailKey); email != "" {
 		request.Email = &email
 	}
 
@@ -212,7 +212,7 @@ func generateGetUsersRequest(r *http.Request) (*api.GetUsersRequest, error) {
 	query := r.URL.Query()
 	var request api.GetUsersRequest
 
-	if limitStr := query.Get("limit"); limitStr != "" {
+	if limitStr := query.Get(api.LimitKey); limitStr != "" {
 		limit, err := strconv.Atoi(limitStr)
 		if err != nil {
 			return nil, &common.HTTPError{
@@ -223,7 +223,7 @@ func generateGetUsersRequest(r *http.Request) (*api.GetUsersRequest, error) {
 		request.Limit = &limit
 	}
 
-	if offsetStr := query.Get("offset"); offsetStr != "" {
+	if offsetStr := query.Get(api.OffsetKey); offsetStr != "" {
 		offset, err := strconv.Atoi(offsetStr)
 		if err != nil {
 			return nil, &common.HTTPError{
@@ -234,11 +234,11 @@ func generateGetUsersRequest(r *http.Request) (*api.GetUsersRequest, error) {
 		request.Offset = &offset
 	}
 
-	if sortField := query.Get("sortField"); sortField != "" {
+	if sortField := query.Get(api.SortFieldKey); sortField != "" {
 		request.SortField = &sortField
 	}
 
-	if sortOrder := query.Get("sortOrder"); sortOrder != "" {
+	if sortOrder := query.Get(api.SortDirectionKey); sortOrder != "" {
 		request.SortDirection = &sortOrder
 	}
 
