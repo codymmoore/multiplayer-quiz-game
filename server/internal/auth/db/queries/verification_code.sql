@@ -1,16 +1,15 @@
--- name: CreateVerificationCode :one
+-- name: UpsertVerificationCode :one
 INSERT INTO verification_code (user_id, verification_code)
 VALUES ($1, $2)
+ON CONFLICT (user_id)
+DO UPDATE SET
+    verification_code = EXCLUDED.verification_code,
+    expires_at = CURRENT_TIMESTAMP + INTERVAL '15 minutes'
 RETURNING *;
 
 -- name: GetVerificationCode :one
 SELECT *
 FROM verification_code
-WHERE user_id = $1
+WHERE user_id = $1 AND
+      expires_at > CURRENT_TIMESTAMP
 LIMIT 1;
-
--- name: UpdateVerificationCode :one
-UPDATE verification_code
-SET verification_code = $2
-WHERE user_id = $1
-RETURNING *;
