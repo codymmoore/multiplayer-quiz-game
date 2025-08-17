@@ -2,9 +2,10 @@
 -- +goose StatementBegin
 CREATE TABLE refresh_token (
     id SERIAL PRIMARY KEY,
-    token_hash TEXT NOT NULL,
-    issued_at TIMESTAMP WITH TIME ZONE NOT NULL,
-    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    token_hash TEXT UNIQUE NOT NULL,
+    user_id INTEGER NOT NULL,
+    issued_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP + INTERVAL '15 minutes',
     active BOOLEAN DEFAULT true NOT NULL
 );
 -- +goose StatementEnd
