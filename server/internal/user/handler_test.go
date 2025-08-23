@@ -166,7 +166,7 @@ func TestGetCurrentUserHandler_Success(t *testing.T) {
 		Username: ValidUsername,
 		Email:    ValidEmail,
 	}
-	ctx := context.WithValue(context.Background(), common.UsersClaimKey, userClaims)
+	ctx := context.WithValue(context.Background(), common.UserClaimsCtxKey, userClaims)
 	request := httptest.NewRequestWithContext(ctx, http.MethodGet, "/user/me", strings.NewReader(""))
 	recorder := httptest.NewRecorder()
 
@@ -226,7 +226,7 @@ func TestGetCurrentUserHandler_ServiceFailure(t *testing.T) {
 		Username: ValidUsername,
 		Email:    ValidEmail,
 	}
-	ctx := context.WithValue(context.Background(), common.UsersClaimKey, userClaims)
+	ctx := context.WithValue(context.Background(), common.UserClaimsCtxKey, userClaims)
 	request := httptest.NewRequestWithContext(ctx, http.MethodGet, "/user/me", strings.NewReader(""))
 	recorder := httptest.NewRecorder()
 
@@ -251,7 +251,7 @@ func TestGetCurrentUserHandler_UserNotFound(t *testing.T) {
 		Username: ValidUsername,
 		Email:    ValidEmail,
 	}
-	ctx := context.WithValue(context.Background(), common.UsersClaimKey, userClaims)
+	ctx := context.WithValue(context.Background(), common.UserClaimsCtxKey, userClaims)
 	request := httptest.NewRequestWithContext(ctx, http.MethodGet, "/user/me", strings.NewReader(""))
 	recorder := httptest.NewRecorder()
 

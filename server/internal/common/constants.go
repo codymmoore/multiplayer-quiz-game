@@ -1,3 +1,5 @@
 package common
 
-const UsersClaimKey string = "user"
+const (
+	UserClaimsCtxKey  = "user"
+)

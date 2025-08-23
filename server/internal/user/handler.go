@@ -41,7 +41,7 @@ func CreateUserHandler(service Service) http.HandlerFunc {
 // GetCurrentUserHandler Handler function for get current user endpoint
 func GetCurrentUserHandler(service Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userClaims, ok := r.Context().Value(common.UsersClaimKey).(*common.UserClaims)
+		userClaims, ok := r.Context().Value(common.UserClaimsCtxKey).(*common.UserClaims)
 		if !ok {
 			http.Error(w, "user claims not found", http.StatusUnauthorized)
 			return

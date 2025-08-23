@@ -56,4 +56,6 @@ func AuthMiddleware(queries db.Queries) func(http.Handler) http.Handler {
             },
         )
     }
+				ctx = context.WithValue(ctx, UsersClaimCtxKey, claims)
+				ctx = context.WithValue(ctx, UserClaimsCtxKey, claims)
 }
