@@ -18,7 +18,8 @@ func InitJWT() error {
 	if secret == "" {
 		return errors.New("JWT_SECRET environment variable not set")
 	}
-	TokenAuth = jwtauth.New("HS256", []byte(secret), nil)
+	JWTSecret = &secret
+	TokenAuth = jwtauth.New(JWTAlg.String(), []byte(secret), nil)
 	return nil
 }
 
@@ -71,9 +72,18 @@ func GetRoutePattern(context context.Context) string {
 }
 
 // GetJWT Gets the JWT string from the request header
-func GetJWT(r *http.Request) string {
+func GetJWT(r *http.Request) string { // use jwtauth.TokenFromHeader()
 	authHeader := r.Header.Get("Authorization")
 	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 	tokenString = strings.TrimSpace(tokenString)
 	return tokenString
+}
+
+// JWTFromContext gets the raw JWT string from the specified Context
+func JWTFromContext(ctx context.Context) (string, error) {
+	jwt, ok := ctx.Value(JWTCtxKey).(string)
+	if !ok || jwt == "" {
+		return "", errors.New("JWT not found in context")
+	}
+	return jwt, nil
 }
