@@ -15,8 +15,3 @@ LIMIT 1;
 UPDATE refresh_token
 SET active = false
 WHERE id = $1;
-
--- name: DeactivateUserRefreshTokens :exec
-UPDATE refresh_token
-SET active = false
-WHERE user_id = $1;

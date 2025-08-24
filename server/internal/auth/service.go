@@ -7,7 +7,9 @@ import (
 	"common/api/user"
 	"context"
 	"crypto/rand"
-	"encoding/base64"
+	"crypto/sha256"
+	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"golang.org/x/crypto/bcrypt"
@@ -55,22 +57,9 @@ func (s *ServiceImpl) Login(ctx context.Context, request *api.LoginRequest) (*ap
 		return nil, fmt.Errorf("invalid password")
 	}
 
-	token, err := jwt.NewBuilder().
-		Issuer("quizchief-auth").
-		Subject(usr.Username).
-		IssuedAt(time.Now()).
-		Expiration(time.Now().Add(30*time.Minute)).
-		Claim(common.UserIdClaimsKey, usr.UserId).
-		Claim(common.UsernameClaimsKey, usr.Username).
-		Claim(common.EmailClaimsKey, usr.Email).
-		Build()
+	accessToken, err := generateJWT(usr.UserId, usr.Username, usr.Email)
 	if err != nil {
-		return nil, fmt.Errorf("unable to build JWT token: %v", err)
-	}
-
-	signedToken, err := jwt.Sign(token, jwt.WithKey(common.JWTAlg, common.JWTSecret))
-	if err != nil {
-		return nil, fmt.Errorf("unable to sign JWT token: %v", err)
+		return nil, fmt.Errorf("unable to generate JWT: %v", err)
 	}
 
 	refreshToken, err := s.generateRefreshToken(ctx, usr.UserId)
@@ -79,26 +68,111 @@ func (s *ServiceImpl) Login(ctx context.Context, request *api.LoginRequest) (*ap
 	}
 
 	return &api.LoginResponse{
-		AccessToken:  string(signedToken),
+		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil
 }
 
-// generateRefreshToken generates refresh token for the user associated with the specified ID
+// Logout logs out the current authenticated user
+func (s *ServiceImpl) Logout(ctx context.Context, request *api.LogoutRequest) (*api.LogoutResponse, error) {
+	tokenHash := hashToken(request.RefreshToken)
+	dbToken, err := s.Queries.GetRefreshToken(ctx, tokenHash)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("invalid refresh token")
+		}
+		return nil, fmt.Errorf("unable to fetch refresh token: %w", err)
+	}
+
+	if err := s.Queries.DeactivateRefreshToken(ctx, dbToken.ID); err != nil {
+		return nil, fmt.Errorf("unable to deactivate refresh token: %v", err)
+	}
+
+	return &api.LogoutResponse{}, nil
+}
+
+// Renew provides a new JWT for a user given a refresh token
+func (s *ServiceImpl) Renew(ctx context.Context, request *api.RenewRequest) (*api.RenewResponse, error) {
+	tokenHash := hashToken(request.RefreshToken)
+	dbToken, err := s.Queries.GetRefreshToken(ctx, tokenHash)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("invalid refresh token")
+		}
+		return nil, fmt.Errorf("unable to fetch refresh token: %w", err)
+	}
+
+	userClaims, ok := ctx.Value(common.UserClaimsCtxKey).(common.UserClaims)
+	if !ok {
+		return nil, errors.New("unable to retrieve user claims")
+	}
+
+	if int(dbToken.UserID) != userClaims.ID {
+		return nil, errors.New("invalid refresh token for authenticated user")
+	}
+
+	accessToken, err := generateJWT(userClaims.ID, userClaims.Username, userClaims.Email)
+	if err != nil {
+		return nil, fmt.Errorf("unable to generate JWT: %v", err)
+	}
+
+	newRefreshToken, err := s.generateRefreshToken(ctx, userClaims.ID)
+	if err != nil {
+		return nil, fmt.Errorf("unable to generate refresh token: %v", err)
+	}
+
+	if err := s.Queries.DeactivateRefreshToken(ctx, dbToken.ID); err != nil {
+		return nil, fmt.Errorf("unable to deactivate refresh token: %v", err)
+	}
+
+	return &api.RenewResponse{
+		AccessToken:  accessToken,
+		RefreshToken: newRefreshToken,
+	}, nil
+}
+
 func (s *ServiceImpl) generateRefreshToken(ctx context.Context, userId int) (string, error) {
 	data := make([]byte, 32)
 	if _, err := rand.Read(data); err != nil {
 		return "", err
 	}
-	token := base64.URLEncoding.EncodeToString(data)
+	token := fmt.Sprintf("%x", data)
 
 	params := db.CreateRefreshTokenParams{
-		TokenHash: token,
+		TokenHash: hashToken(token),
 		UserID:    int32(userId),
 	}
-	refreshToken, err := s.Queries.CreateRefreshToken(ctx, params)
+
+	_, err := s.Queries.CreateRefreshToken(ctx, params)
 	if err != nil {
 		return "", err
 	}
-	return refreshToken.TokenHash, nil
+
+	return token, nil
+}
+
+func generateJWT(userId int, username string, email string) (string, error) {
+	token, err := jwt.NewBuilder().
+		Issuer("quizchief-auth").
+		Subject(username).
+		IssuedAt(time.Now()).
+		Expiration(time.Now().Add(30*time.Minute)).
+		Claim(common.UserIdClaimsKey, userId).
+		Claim(common.UsernameClaimsKey, username).
+		Claim(common.EmailClaimsKey, email).
+		Build()
+	if err != nil {
+		return "", err
+	}
+
+	signedToken, err := jwt.Sign(token, jwt.WithKey(common.JWTAlg, common.JWTSecret))
+	if err != nil {
+		return "", err
+	}
+
+	return string(signedToken), nil
+}
+
+func hashToken(token string) string {
+	return fmt.Sprintf("%x", sha256.Sum256([]byte(token)))
 }

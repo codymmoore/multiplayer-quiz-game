@@ -20,6 +20,8 @@ type AuthInfo struct {
 
 type LoginResponse = AuthInfo
 
+type LogoutResponse struct{}
+
 type RenewResponse = AuthInfo
 
 type SendVerificationEmailResponse struct {
