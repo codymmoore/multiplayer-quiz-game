@@ -14,8 +14,7 @@ type RenewRequest struct {
 }
 
 type SendVerificationEmailRequest struct {
-	UserId int    `json:"userId"`
-	Email  string `json:"email"`
+	Email string `json:"email"`
 }
 
 type VerifyEmailRequest struct {

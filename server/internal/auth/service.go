@@ -11,6 +11,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/keighl/postmark"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -19,36 +20,32 @@ import (
 
 // Service Interface for performing authentication operations
 type Service interface {
-	Login(context context.Context, request *api.LoginRequest) (*api.LoginResponse, error)
-	Logout(context context.Context, request *api.LogoutRequest) (*api.LogoutResponse, error)
-	Renew(context context.Context, request *api.RenewRequest) (*api.RenewResponse, error)
+	Login(ctx context.Context, request *api.LoginRequest) (*api.LoginResponse, error)
+	Logout(ctx context.Context, request *api.LogoutRequest) (*api.LogoutResponse, error)
+	Renew(ctx context.Context, request *api.RenewRequest) (*api.RenewResponse, error)
 	SendVerificationEmail(
-		context context.Context,
+		ctx context.Context,
 		request *api.SendVerificationEmailRequest,
 	) (*api.SendVerificationEmailResponse, error)
-	VerifyEmail(context context.Context, request *api.VerifyEmailRequest) (*api.VerifyEmailResponse, error)
+	VerifyEmail(ctx context.Context, request *api.VerifyEmailRequest) (*api.VerifyEmailResponse, error)
 	// endpoint for client JWT?
 }
 
 // ServiceImpl Implementation for Service
 type ServiceImpl struct {
-	Queries db.Querier
-	BaseUrl string
+	Queries    db.Querier
+	BaseUrl    string
+	UserClient user.Client
 }
 
 // Login provides JWT for a user
 func (s *ServiceImpl) Login(ctx context.Context, request *api.LoginRequest) (*api.LoginResponse, error) {
-	userClient := user.ClientImpl{
-		BaseUrl:    s.BaseUrl,
-		HttpClient: http.DefaultClient,
-	}
-
 	getUserRequest := &user.GetUserRequest{Username: &request.Username}
 	jwtStr, err := common.JWTFromContext(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve JWT from context: %v", err)
 	}
-	usr, err := userClient.GetUser(getUserRequest, jwtStr)
+	usr, err := s.UserClient.GetUser(getUserRequest, jwtStr)
 	if err != nil {
 		return nil, fmt.Errorf("unable to retrieve user: %v", err)
 	}
@@ -57,7 +54,7 @@ func (s *ServiceImpl) Login(ctx context.Context, request *api.LoginRequest) (*ap
 		return nil, fmt.Errorf("invalid password")
 	}
 
-	accessToken, err := generateJWT(usr.UserId, usr.Username, usr.Email)
+	accessToken, err := GenerateJWT(usr.UserId, usr.Username, usr.Email)
 	if err != nil {
 		return nil, fmt.Errorf("unable to generate JWT: %v", err)
 	}
@@ -75,7 +72,7 @@ func (s *ServiceImpl) Login(ctx context.Context, request *api.LoginRequest) (*ap
 
 // Logout logs out the current authenticated user
 func (s *ServiceImpl) Logout(ctx context.Context, request *api.LogoutRequest) (*api.LogoutResponse, error) {
-	tokenHash := hashToken(request.RefreshToken)
+	tokenHash := SecureHash(request.RefreshToken)
 	dbToken, err := s.Queries.GetRefreshToken(ctx, tokenHash)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -93,7 +90,7 @@ func (s *ServiceImpl) Logout(ctx context.Context, request *api.LogoutRequest) (*
 
 // Renew provides a new JWT for a user given a refresh token
 func (s *ServiceImpl) Renew(ctx context.Context, request *api.RenewRequest) (*api.RenewResponse, error) {
-	tokenHash := hashToken(request.RefreshToken)
+	tokenHash := SecureHash(request.RefreshToken)
 	dbToken, err := s.Queries.GetRefreshToken(ctx, tokenHash)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -111,7 +108,7 @@ func (s *ServiceImpl) Renew(ctx context.Context, request *api.RenewRequest) (*ap
 		return nil, errors.New("invalid refresh token for authenticated user")
 	}
 
-	accessToken, err := generateJWT(userClaims.ID, userClaims.Username, userClaims.Email)
+	accessToken, err := GenerateJWT(userClaims.ID, userClaims.Username, userClaims.Email)
 	if err != nil {
 		return nil, fmt.Errorf("unable to generate JWT: %v", err)
 	}
@@ -131,6 +128,55 @@ func (s *ServiceImpl) Renew(ctx context.Context, request *api.RenewRequest) (*ap
 	}, nil
 }
 
+func (s *ServiceImpl) SendVerificationEmail(
+	ctx context.Context,
+	request *api.SendVerificationEmailRequest,
+) (*api.SendVerificationEmailResponse, error) {
+	getUserRequest := &user.GetUserRequest{Email: &request.Email}
+	jwtStr, err := common.JWTFromContext(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("unable to retrieve JWT from context: %v", err)
+	}
+	usr, err := s.UserClient.GetUser(getUserRequest, jwtStr)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("no user with specified email found")
+		}
+		return nil, fmt.Errorf("unable to retrieve user: %v", err)
+	}
+
+	verificationCode, err := s.generateVerificationCode(ctx, usr.UserId)
+	if err != nil {
+		return nil, fmt.Errorf("unable to generate verification code: %v", err)
+	}
+
+	verificationLink := fmt.Sprintf(
+		"%s%s?%s=%s",
+		s.BaseUrl,
+		api.VerifyEmailEndpoint,
+		api.VerificationCodeQueryParamId,
+		verificationCode,
+	)
+	email := postmark.Email{
+		From:    "no-reply@quizchief.gg",
+		To:      usr.Email,
+		Subject: "Email Verification",
+		HtmlBody: fmt.Sprintf(
+			"<p>Click here to verify your email: <a href='%s'>%s</a></p>",
+			verificationLink,
+			verificationLink,
+		),
+		TextBody:   fmt.Sprintf("Click here to verify your email: %s", verificationLink),
+		Tag:        "email-verification",
+		TrackOpens: true,
+	}
+	if err := SendEmail(&email); err != nil {
+		return nil, fmt.Errorf("unable to send verification email: %v", err)
+	}
+
+	return &api.SendVerificationEmailResponse{}, nil
+}
+
 func (s *ServiceImpl) generateRefreshToken(ctx context.Context, userId int) (string, error) {
 	data := make([]byte, 32)
 	if _, err := rand.Read(data); err != nil {
@@ -139,7 +185,7 @@ func (s *ServiceImpl) generateRefreshToken(ctx context.Context, userId int) (str
 	token := fmt.Sprintf("%x", data)
 
 	params := db.CreateRefreshTokenParams{
-		TokenHash: hashToken(token),
+		TokenHash: SecureHash(token),
 		UserID:    int32(userId),
 	}
 
@@ -151,28 +197,21 @@ func (s *ServiceImpl) generateRefreshToken(ctx context.Context, userId int) (str
 	return token, nil
 }
 
-func generateJWT(userId int, username string, email string) (string, error) {
-	token, err := jwt.NewBuilder().
-		Issuer("quizchief-auth").
-		Subject(username).
-		IssuedAt(time.Now()).
-		Expiration(time.Now().Add(30*time.Minute)).
-		Claim(common.UserIdClaimsKey, userId).
-		Claim(common.UsernameClaimsKey, username).
-		Claim(common.EmailClaimsKey, email).
-		Build()
+func (s *ServiceImpl) generateVerificationCode(ctx context.Context, userId int) (string, error) {
+	data := make([]byte, 16)
+	if _, err := rand.Read(data); err != nil {
+		return "", err
+	}
+	verificationCode := fmt.Sprintf("%x", data)
+
+	params := db.UpsertVerificationCodeParams{
+		UserID:           int32(userId),
+		VerificationCode: SecureHash(verificationCode),
+	}
+	_, err := s.Queries.UpsertVerificationCode(ctx, params)
 	if err != nil {
 		return "", err
 	}
 
-	signedToken, err := jwt.Sign(token, jwt.WithKey(common.JWTAlg, common.JWTSecret))
-	if err != nil {
-		return "", err
-	}
-
-	return string(signedToken), nil
-}
-
-func hashToken(token string) string {
-	return fmt.Sprintf("%x", sha256.Sum256([]byte(token)))
+	return verificationCode, nil
 }
