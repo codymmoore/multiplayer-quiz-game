@@ -8,4 +8,6 @@ const (
 	OffsetKey        string = "offset"
 	SortFieldKey     string = "sortField"
 	SortDirectionKey string = "sortDirection"
+
+	VerifyUserEndpoint = "/user/%v/verify"
 )

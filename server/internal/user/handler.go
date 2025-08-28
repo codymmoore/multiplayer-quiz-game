@@ -180,6 +180,34 @@ func DeleteUserHandler(service Service) http.HandlerFunc {
 	}
 }
 
+// VerifyUserHandler handles verify user requests
+func VerifyUserHandler(service Service) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		request, err := generateVerifyUserRequest(r)
+		if err != nil {
+			handleError(err, w)
+			return
+		}
+
+		if err := ValidateVerifyUserRequest(request, service, r.Context()); err != nil {
+			handleError(err, w)
+			return
+		}
+
+		response, err := service.VerifyUser(r.Context(), request)
+		if err != nil {
+			handleError(err, w)
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNoContent)
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			http.Error(w, "failed to encode response", http.StatusInternalServerError)
+		}
+	}
+}
+
 // generateGetUserRequest Populate and return GetUserRequest
 func generateGetUserRequest(r *http.Request) (*api.GetUserRequest, error) {
 	query := r.URL.Query()
@@ -271,6 +299,22 @@ func generateUpdateUserRequest(r *http.Request) (*api.UpdateUserRequest, error) 
 // generateDeleteUserRequest Populate and return DeleteUserRequest
 func generateDeleteUserRequest(r *http.Request) (*api.DeleteUserRequest, error) {
 	var request api.DeleteUserRequest
+
+	userId, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		return nil, &common.HTTPError{
+			StatusCode: http.StatusBadRequest,
+			Message:    "invalid user id",
+		}
+	}
+	request.UserId = userId
+
+	return &request, nil
+}
+
+// generateVerifyUserRequest populates and returns VerifyUserRequest
+func generateVerifyUserRequest(r *http.Request) (*api.VerifyUserRequest, error) {
+	var request api.VerifyUserRequest
 
 	userId, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {

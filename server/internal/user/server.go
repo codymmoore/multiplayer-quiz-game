@@ -2,6 +2,7 @@ package user
 
 import (
 	"common"
+	api "common/api/user"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -50,6 +51,7 @@ func RunServer() {
 			router.Get("/user/all", GetUsersHandler(service))
 			router.Patch("/user/{id}", UpdateUserHandler(service))
 			router.Delete("/user/{id}", DeleteUserHandler(service))
+			router.Patch(fmt.Sprintf(api.VerifyUserEndpoint, "{id}"), VerifyUserHandler(service))
 		},
 	)
 

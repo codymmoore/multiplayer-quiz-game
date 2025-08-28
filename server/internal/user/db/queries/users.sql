@@ -32,6 +32,11 @@ SET username = COALESCE(sqlc.narg(username), username),
 WHERE id = $1
 RETURNING *;
 
+-- name: VerifyUser :exec
+UPDATE users
+SET is_verified = true
+WHERE id = $1;
+
 -- name: DeleteUser :exec
 DELETE FROM users
 WHERE id = $1;

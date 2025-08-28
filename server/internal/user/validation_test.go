@@ -267,6 +267,54 @@ func TestValidateDeleteUserRequest_UserNotFound(t *testing.T) {
 	assertHTTPError(t, err, http.StatusNotFound)
 }
 
+func TestValidateVerifyUserRequest_Success(t *testing.T) {
+	service := &mockService{
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+			return &api.GetUserResponse{}, nil
+		},
+	}
+
+	request := api.VerifyUserRequest{
+		UserId: 1,
+	}
+
+	if err := ValidateVerifyUserRequest(&request, service, nil); err != nil {
+		t.Errorf(`ValidateVerifyUserRequest(&request, service, nil) = "%v", expected "<nil>"`, err)
+	}
+}
+
+func TestValidateVerifyUserRequest_InvalidUserId(t *testing.T) {
+	service := &mockService{
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+			return &api.GetUserResponse{}, nil
+		},
+	}
+
+	request := api.VerifyUserRequest{
+		UserId: -1,
+	}
+
+	if err := ValidateVerifyUserRequest(&request, service, nil); err == nil {
+		t.Error(`ValidateVerifyUserRequest(&request, service, nil) = "<nil>", expected non-nil"`)
+	}
+}
+
+func TestValidateVerifyUserRequest_UserNotFound(t *testing.T) {
+	service := &mockService{
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+			return &api.GetUserResponse{}, nil
+		},
+	}
+
+	request := api.VerifyUserRequest{
+		UserId: -1,
+	}
+
+	if err := ValidateVerifyUserRequest(&request, service, nil); err == nil {
+		t.Error(`ValidateVerifyUserRequest(&request, service, nil) = "<nil>", expected non-nil"`)
+	}
+}
+
 func TestValidateUsername_Success(t *testing.T) {
 	service := &mockService{
 		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {

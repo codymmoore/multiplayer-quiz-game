@@ -16,7 +16,7 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"const userIndex = Math.floor(100000 + Math.random() * 900000);//Number(pm.variables.get(\"userIndex\"));\r",
+									"const userIndex = Math.floor(100000 + Math.random() * 900000);\r",
 									"const username = `testUser-${userIndex}`;\r",
 									"const email = `${username}@test.com`\r",
 									"\r",
@@ -1933,6 +1933,199 @@
 									"key": "sortDirection",
 									"value": "desc"
 								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Verify User",
+			"item": [
+				{
+					"name": "Verify User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 204\", () => {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/{{userId}}/verify",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"{{userId}}",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fail - Nonexistent User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 404\", () => {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/9999/verify",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"9999",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid User ID - Negative",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/-1/verify",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"-1",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid User ID - Wrong Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/user/abcd/verify",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"user",
+								"abcd",
+								"verify"
 							]
 						}
 					},

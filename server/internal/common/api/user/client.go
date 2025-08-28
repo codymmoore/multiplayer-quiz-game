@@ -16,6 +16,7 @@ type Client interface {
 	GetUsers(request *GetUsersRequest, jwt string) (*GetUsersResponse, error)
 	UpdateUser(request *UpdateUserRequest, jwt string) (*UpdateUserResponse, error)
 	DeleteUser(request *DeleteUserRequest, jwt string) (*DeleteUserResponse, error)
+	VerifyUser(request *VerifyUserRequest, jwt string) (*VerifyUserResponse, error)
 }
 
 // ClientImpl Implementation for user service client
@@ -201,6 +202,33 @@ func (client *ClientImpl) DeleteUser(request *DeleteUserRequest, jwt string) (*D
 	}
 
 	return &DeleteUserResponse{}, nil
+}
+
+// VerifyUser verifies a user
+func (client *ClientImpl) VerifyUser(request *VerifyUserRequest, jwt string) (*VerifyUserResponse, error) {
+	if request == nil {
+		return nil, fmt.Errorf("request cannot be nil")
+	}
+
+	urlString := client.BaseUrl + fmt.Sprintf(VerifyUserEndpoint, request.UserId)
+	httpRequest, err := http.NewRequest(http.MethodPatch, urlString, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create HTTP request: %w", err)
+	}
+	httpRequest.Header.Set("Authorization", "Bearer "+jwt)
+	httpRequest.Header.Set("Content-Type", "application/json")
+
+	httpResponse, err := client.HttpClient.Do(httpRequest)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send HTTP request: %w", err)
+	}
+	defer httpResponse.Body.Close()
+
+	if httpResponse.StatusCode != http.StatusNoContent {
+		return nil, fmt.Errorf("unexpected status code: %d", httpResponse.StatusCode)
+	}
+
+	return &VerifyUserResponse{}, nil
 }
 
 // createGetUserQueryString Create string containing query parameters from GetUserRequest

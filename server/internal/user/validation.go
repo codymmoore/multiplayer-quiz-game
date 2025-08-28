@@ -170,6 +170,26 @@ func ValidateDeleteUserRequest(request *api.DeleteUserRequest, service Service, 
 	return nil
 }
 
+// ValidateVerifyUserRequest validates request for verifying user
+func ValidateVerifyUserRequest(request *api.VerifyUserRequest, service Service, context context.Context) error {
+	if request.UserId < 0 {
+		return &common.HTTPError{
+			StatusCode: http.StatusBadRequest,
+			Message:    "invalid user id",
+		}
+	}
+
+	getUserRequest := api.GetUserRequest{UserId: &request.UserId}
+	if response, _ := service.GetUser(context, &getUserRequest); response == nil {
+		return &common.HTTPError{
+			StatusCode: http.StatusNotFound,
+			Message:    "user not found",
+		}
+	}
+
+	return nil
+}
+
 // validateUsername Validate a username
 func validateUsername(username string, service Service, context context.Context) error {
 	if len(username) < MinUsernameLength || len(username) > MaxUsernameLength {

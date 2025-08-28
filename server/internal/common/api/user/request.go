@@ -26,6 +26,10 @@ type UpdateUserRequest struct {
 	Password *string `json:"password"`
 }
 
+type VerifyUserRequest struct {
+	UserId int
+}
+
 type DeleteUserRequest struct {
 	UserId int `json:"userId"`
 }

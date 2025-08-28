@@ -29,6 +29,7 @@ type mockService struct {
 		*api.DeleteUserResponse,
 		error,
 	)
+	verifyUserFunc func(context context.Context, request *api.VerifyUserRequest) (*api.VerifyUserResponse, error)
 }
 
 func (m *mockService) CreateUser(context context.Context, request *api.CreateUserRequest) (
@@ -64,6 +65,13 @@ func (m *mockService) DeleteUser(context context.Context, request *api.DeleteUse
 	error,
 ) {
 	return m.deleteUserFunc(context, request)
+}
+
+func (m *mockService) VerifyUser(context context.Context, request *api.VerifyUserRequest) (
+	*api.VerifyUserResponse,
+	error,
+) {
+	return m.verifyUserFunc(context, request)
 }
 
 func assertHTTPError(t *testing.T, err error, statusCode int) {

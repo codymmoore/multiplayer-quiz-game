@@ -929,6 +929,113 @@ func TestDeleteUserHandler_ServiceFailure(t *testing.T) {
 	}
 }
 
+func TestVerifyUserHandler_Success(t *testing.T) {
+	userId := 1
+	service := &mockService{
+		verifyUserFunc: func(context context.Context, request *api.VerifyUserRequest) (
+			*api.VerifyUserResponse,
+			error,
+		) {
+			return &api.VerifyUserResponse{}, nil
+		},
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+			return &api.GetUserResponse{}, nil
+		},
+	}
+
+	urlString := fmt.Sprintf(api.VerifyUserEndpoint, userId)
+	request := httptest.NewRequest(http.MethodPatch, urlString, strings.NewReader(""))
+	recorder := httptest.NewRecorder()
+
+	r := chi.NewRouter()
+	r.Patch(fmt.Sprintf(api.VerifyUserEndpoint, "{id}"), VerifyUserHandler(service))
+	r.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusNoContent {
+		t.Errorf(`recorder.Code = "%v", expected "%v"`, recorder.Code, http.StatusNoContent)
+	}
+}
+
+func TestVerifyUserHandler_RequestGenerationError_InvalidUserId(t *testing.T) {
+	service := &mockService{
+		verifyUserFunc: func(context context.Context, request *api.VerifyUserRequest) (
+			*api.VerifyUserResponse,
+			error,
+		) {
+			return &api.VerifyUserResponse{}, nil
+		},
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+			return &api.GetUserResponse{}, nil
+		},
+	}
+
+	urlString := fmt.Sprintf(api.VerifyUserEndpoint, "invalidId")
+	request := httptest.NewRequest(http.MethodPatch, urlString, strings.NewReader(""))
+	recorder := httptest.NewRecorder()
+
+	r := chi.NewRouter()
+	r.Patch(fmt.Sprintf(api.VerifyUserEndpoint, "{id}"), VerifyUserHandler(service))
+	r.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusBadRequest {
+		t.Errorf(`recorder.Code = "%v", expected "%v"`, recorder.Code, http.StatusBadRequest)
+	}
+}
+
+func TestVerifyUserHandler_InvalidRequest(t *testing.T) {
+	userId := -1
+	service := &mockService{
+		verifyUserFunc: func(context context.Context, request *api.VerifyUserRequest) (
+			*api.VerifyUserResponse,
+			error,
+		) {
+			return &api.VerifyUserResponse{}, nil
+		},
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+			return &api.GetUserResponse{}, nil
+		},
+	}
+
+	urlString := fmt.Sprintf(api.VerifyUserEndpoint, userId)
+	request := httptest.NewRequest(http.MethodPatch, urlString, strings.NewReader(""))
+	recorder := httptest.NewRecorder()
+
+	r := chi.NewRouter()
+	r.Patch(fmt.Sprintf(api.VerifyUserEndpoint, "{id}"), VerifyUserHandler(service))
+	r.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusBadRequest {
+		t.Errorf(`recorder.Code = "%v", expected "%v"`, recorder.Code, http.StatusBadRequest)
+	}
+}
+
+func TestVerifyUserHandler_ServiceFailure(t *testing.T) {
+	userId := 1
+	service := &mockService{
+		verifyUserFunc: func(context context.Context, request *api.VerifyUserRequest) (
+			*api.VerifyUserResponse,
+			error,
+		) {
+			return nil, errors.New("")
+		},
+		getUserFunc: func(context context.Context, request *api.GetUserRequest) (*api.GetUserResponse, error) {
+			return &api.GetUserResponse{}, nil
+		},
+	}
+
+	urlString := fmt.Sprintf(api.VerifyUserEndpoint, userId)
+	request := httptest.NewRequest(http.MethodPatch, urlString, strings.NewReader(""))
+	recorder := httptest.NewRecorder()
+
+	r := chi.NewRouter()
+	r.Patch(fmt.Sprintf(api.VerifyUserEndpoint, "{id}"), VerifyUserHandler(service))
+	r.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusInternalServerError {
+		t.Errorf(`recorder.Code = "%v", expected "%v"`, recorder.Code, http.StatusInternalServerError)
+	}
+}
+
 func TestGenerateGetUsersRequest_Success(t *testing.T) {
 	userId := 1
 	username := ValidUsername

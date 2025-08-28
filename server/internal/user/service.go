@@ -6,6 +6,7 @@ import (
 	api "common/api/user"
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"golang.org/x/crypto/bcrypt"
 	"user/db/generated"
@@ -20,6 +21,7 @@ type Service interface {
 	GetUsers(context context.Context, request *api.GetUsersRequest) (*api.GetUsersResponse, error)
 	UpdateUser(context context.Context, request *api.UpdateUserRequest) (*api.UpdateUserResponse, error)
 	DeleteUser(context context.Context, request *api.DeleteUserRequest) (*api.DeleteUserResponse, error)
+	VerifyUser(context context.Context, request *api.VerifyUserRequest) (*api.VerifyUserResponse, error)
 }
 
 // ServiceImpl Implementation for the Service
@@ -81,6 +83,9 @@ func (service *ServiceImpl) GetUser(context context.Context, request *api.GetUse
 
 	user, err := service.Queries.GetUser(context, params)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("user not found")
+		}
 		return nil, fmt.Errorf("failed to retrieve user: %w", err)
 	}
 
@@ -234,4 +239,15 @@ func (service *ServiceImpl) DeleteUser(
 		return nil, fmt.Errorf("failed to delete user: %w", err)
 	}
 	return &api.DeleteUserResponse{}, nil
+}
+
+// VerifyUser verifies a user
+func (service *ServiceImpl) VerifyUser(context context.Context, request *api.VerifyUserRequest) (
+	*api.VerifyUserResponse,
+	error,
+) {
+	if err := service.Queries.VerifyUser(context, int32(request.UserId)); err != nil {
+		return nil, fmt.Errorf("failed to verify user: %w", err)
+	}
+	return &api.VerifyUserResponse{}, nil
 }

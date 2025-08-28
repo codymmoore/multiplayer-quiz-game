@@ -28,5 +28,8 @@ type GetUsersResponse struct {
 
 type UpdateUserResponse = User
 
+type VerifyUserResponse struct {
+}
+
 type DeleteUserResponse struct {
 }
