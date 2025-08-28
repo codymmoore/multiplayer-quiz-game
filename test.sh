@@ -11,7 +11,7 @@ for SERVICE in "common" "${SERVICES[@]}"; do
 
     cd $SERVICE_PATH
 
-    echo "---------- ${SERVICES} ----------"
+    echo "---------- ${SERVICE} ----------"
     go test -v ./...
 
     cd $PROJECT_ROOT
