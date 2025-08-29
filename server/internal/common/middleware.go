@@ -1,7 +1,6 @@
 package common
 
 import (
-	db "auth/db/generated"
 	"common/api/user"
 	"context"
 	"fmt"
@@ -10,7 +9,7 @@ import (
 )
 
 // JWTMiddleware Adds JWT string to Context
-func JWTMiddleware(queries db.Queries) func(http.Handler) http.Handler {
+func JWTMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +22,7 @@ func JWTMiddleware(queries db.Queries) func(http.Handler) http.Handler {
 }
 
 // AuthMiddleware Validates JWT and extracts claims
-func AuthMiddleware(queries db.Queries) func(http.Handler) http.Handler {
+func AuthMiddleware() func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(
 			func(w http.ResponseWriter, r *http.Request) {

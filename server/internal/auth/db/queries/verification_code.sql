@@ -10,6 +10,6 @@ RETURNING *;
 -- name: GetVerificationCode :one
 SELECT *
 FROM verification_code
-WHERE user_id = $1 AND
+WHERE verification_code_hash = $1 AND
       expires_at > CURRENT_TIMESTAMP
 LIMIT 1;
