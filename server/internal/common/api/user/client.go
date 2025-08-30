@@ -2,8 +2,10 @@ package user
 
 import (
 	"bytes"
+	"common/errors"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -51,7 +53,10 @@ func (client *ClientImpl) CreateUser(request *CreateUserRequest, jwt string) (*C
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode != http.StatusCreated {
-		return nil, fmt.Errorf("unexpected status code: %d", httpResponse.StatusCode)
+		return nil, &errors.HTTP{
+			StatusCode: httpResponse.StatusCode,
+			Message:    getErrorString(&httpResponse.Body),
+		}
 	}
 
 	var response CreateUserResponse
@@ -88,7 +93,10 @@ func (client *ClientImpl) GetUser(request *GetUserRequest, jwt string) (*GetUser
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d", httpResponse.StatusCode)
+		return nil, &errors.HTTP{
+			StatusCode: httpResponse.StatusCode,
+			Message:    getErrorString(&httpResponse.Body),
+		}
 	}
 
 	var response GetUserResponse
@@ -129,7 +137,10 @@ func (client *ClientImpl) GetUsers(request *GetUsersRequest, jwt string) (*GetUs
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d", httpResponse.StatusCode)
+		return nil, &errors.HTTP{
+			StatusCode: httpResponse.StatusCode,
+			Message:    getErrorString(&httpResponse.Body),
+		}
 	}
 
 	var response GetUsersResponse
@@ -166,7 +177,10 @@ func (client *ClientImpl) UpdateUser(request *UpdateUserRequest, jwt string) (*U
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unexpected status code: %d", httpResponse.StatusCode)
+		return nil, &errors.HTTP{
+			StatusCode: httpResponse.StatusCode,
+			Message:    getErrorString(&httpResponse.Body),
+		}
 	}
 
 	var response UpdateUserResponse
@@ -198,7 +212,10 @@ func (client *ClientImpl) DeleteUser(request *DeleteUserRequest, jwt string) (*D
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode != http.StatusNoContent {
-		return nil, fmt.Errorf("unexpected status code: %d", httpResponse.StatusCode)
+		return nil, &errors.HTTP{
+			StatusCode: httpResponse.StatusCode,
+			Message:    getErrorString(&httpResponse.Body),
+		}
 	}
 
 	return &DeleteUserResponse{}, nil
@@ -225,7 +242,10 @@ func (client *ClientImpl) VerifyUser(request *VerifyUserRequest, jwt string) (*V
 	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode != http.StatusNoContent {
-		return nil, fmt.Errorf("unexpected status code: %d", httpResponse.StatusCode)
+		return nil, &errors.HTTP{
+			StatusCode: httpResponse.StatusCode,
+			Message:    getErrorString(&httpResponse.Body),
+		}
 	}
 
 	return &VerifyUserResponse{}, nil
@@ -276,4 +296,13 @@ func createGetUsersQueryString(request *GetUsersRequest) (string, error) {
 	}
 
 	return query.Encode(), nil
+}
+
+// getErrorString get error string from HTTP response body
+func getErrorString(responseBody *io.ReadCloser) string {
+	if bodyBytes, err := io.ReadAll(*responseBody); err == nil {
+		return string(bodyBytes)
+	} else {
+		return fmt.Sprintf("failed to read response body: %v", err)
+	}
 }
