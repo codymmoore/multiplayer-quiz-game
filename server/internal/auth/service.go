@@ -12,9 +12,11 @@ import (
     "fmt"
     "github.com/keighl/postmark"
     "golang.org/x/crypto/bcrypt"
+    "net/http"
 )
 
 // Service Interface for performing authentication operations
+// TODO endpoint for client JWT?
 type Service interface {
     Login(ctx context.Context, request *api.LoginRequest) (*api.LoginResponse, error)
     Logout(ctx context.Context, request *api.LogoutRequest) (*api.LogoutResponse, error)
@@ -24,7 +26,6 @@ type Service interface {
         request *api.SendVerificationEmailRequest,
     ) (*api.SendVerificationEmailResponse, error)
     VerifyEmail(ctx context.Context, request *api.VerifyEmailRequest) (*api.VerifyEmailResponse, error)
-    // endpoint for client JWT?
 }
 
 // ServiceImpl Implementation for Service
@@ -40,25 +41,40 @@ func (s *ServiceImpl) Login(ctx context.Context, request *api.LoginRequest) (*ap
     getUserRequest := &user.GetUserRequest{Username: &request.Username}
     jwtStr, err := common.JWTFromContext(ctx)
     if err != nil {
-        return nil, fmt.Errorf("unable to retrieve JWT from context: %v", err)
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to retrieve JWT from context: %v", err),
+        }
     }
     usr, err := s.UserClient.GetUser(getUserRequest, jwtStr)
     if err != nil {
-        return nil, fmt.Errorf("unable to retrieve user: %v", err)
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to retrieve user: %v", err),
+        }
     }
 
     if err := bcrypt.CompareHashAndPassword([]byte(usr.PasswordHash), []byte(request.Password)); err != nil {
-        return nil, fmt.Errorf("invalid password")
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusBadRequest,
+            Message:    "incorrect password",
+        }
     }
 
     accessToken, err := GenerateJWT(usr.UserId, usr.Username, usr.Email)
     if err != nil {
-        return nil, fmt.Errorf("unable to generate JWT: %v", err)
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to generate JWT: %v", err),
+        }
     }
 
     refreshToken, err := s.generateRefreshToken(ctx, usr.UserId)
     if err != nil {
-        return nil, fmt.Errorf("unable to generate refresh token: %v", err)
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to generate refresh token: %v", err),
+        }
     }
 
     return &api.LoginResponse{
@@ -73,13 +89,37 @@ func (s *ServiceImpl) Logout(ctx context.Context, request *api.LogoutRequest) (*
     dbToken, err := s.Queries.GetRefreshToken(ctx, tokenHash)
     if err != nil {
         if errors.Is(err, sql.ErrNoRows) {
-            return nil, errors.New("invalid refresh token")
+            return nil, &common.HTTPError{
+                StatusCode: http.StatusBadRequest,
+                Message:    "invalid refresh token",
+            }
         }
-        return nil, fmt.Errorf("unable to fetch refresh token: %w", err)
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to fetch refresh token: %v", err),
+        }
+    }
+
+    userClaims, ok := ctx.Value(common.UserClaimsCtxKey).(common.UserClaims)
+    if !ok {
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    "unable to retrieve user claims",
+        }
+    }
+
+    if int(dbToken.UserID) != userClaims.ID {
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusUnauthorized,
+            Message:    "invalid refresh token",
+        }
     }
 
     if err := s.Queries.DeactivateRefreshToken(ctx, dbToken.ID); err != nil {
-        return nil, fmt.Errorf("unable to deactivate refresh token: %v", err)
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to deactivate refresh token: %v", err),
+        }
     }
 
     return &api.LogoutResponse{}, nil
@@ -91,32 +131,53 @@ func (s *ServiceImpl) Renew(ctx context.Context, request *api.RenewRequest) (*ap
     dbToken, err := s.Queries.GetRefreshToken(ctx, tokenHash)
     if err != nil {
         if errors.Is(err, sql.ErrNoRows) {
-            return nil, errors.New("invalid refresh token")
+            return nil, &common.HTTPError{
+                StatusCode: http.StatusBadRequest,
+                Message:    "invalid refresh token",
+            }
         }
-        return nil, fmt.Errorf("unable to fetch refresh token: %w", err)
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to fetch refresh token: %v", err),
+        }
     }
 
     userClaims, ok := ctx.Value(common.UserClaimsCtxKey).(common.UserClaims)
     if !ok {
-        return nil, errors.New("unable to retrieve user claims")
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    "unable to retrieve user claims",
+        }
     }
 
     if int(dbToken.UserID) != userClaims.ID {
-        return nil, errors.New("invalid refresh token for authenticated user")
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusUnauthorized,
+            Message:    "invalid refresh token for authenticated user",
+        }
     }
 
     accessToken, err := GenerateJWT(userClaims.ID, userClaims.Username, userClaims.Email)
     if err != nil {
-        return nil, fmt.Errorf("unable to generate JWT: %v", err)
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to generate JWT: %v", err),
+        }
     }
 
     newRefreshToken, err := s.generateRefreshToken(ctx, userClaims.ID)
     if err != nil {
-        return nil, fmt.Errorf("unable to generate refresh token: %v", err)
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to generate refresh token: %v", err),
+        }
     }
 
     if err := s.Queries.DeactivateRefreshToken(ctx, dbToken.ID); err != nil {
-        return nil, fmt.Errorf("unable to deactivate refresh token: %v", err)
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to deactivate refresh token: %v", err),
+        }
     }
 
     return &api.RenewResponse{
@@ -133,19 +194,31 @@ func (s *ServiceImpl) SendVerificationEmail(
     getUserRequest := &user.GetUserRequest{Email: &request.Email}
     jwtStr, err := common.JWTFromContext(ctx)
     if err != nil {
-        return nil, fmt.Errorf("unable to retrieve JWT from context: %v", err)
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to retrieve JWT from context: %v", err),
+        }
     }
     usr, err := s.UserClient.GetUser(getUserRequest, jwtStr)
     if err != nil {
         if errors.Is(err, sql.ErrNoRows) {
-            return nil, errors.New("no user with specified email found")
+            return nil, &common.HTTPError{
+                StatusCode: http.StatusBadRequest,
+                Message:    "no user with specified email found",
+            }
         }
-        return nil, fmt.Errorf("unable to retrieve user: %v", err)
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to retrieve user: %v", err),
+        }
     }
 
     verificationCode, err := s.generateVerificationCode(ctx, usr.UserId)
     if err != nil {
-        return nil, fmt.Errorf("unable to generate verification code: %v", err)
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to generate verification code: %v", err),
+        }
     }
 
     verificationLink := fmt.Sprintf(
@@ -169,7 +242,10 @@ func (s *ServiceImpl) SendVerificationEmail(
         TrackOpens: true,
     }
     if _, err := s.PostmarkClient.SendEmail(email); err != nil {
-        return nil, fmt.Errorf("unable to send verification email: %v", err)
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to send verification email: %v", err),
+        }
     }
 
     return &api.SendVerificationEmailResponse{}, nil
@@ -184,21 +260,33 @@ func (s *ServiceImpl) VerifyEmail(ctx context.Context, request *api.VerifyEmailR
     dbCode, err := s.Queries.GetVerificationCode(ctx, codeHash)
     if err != nil {
         if errors.Is(err, sql.ErrNoRows) {
-            return nil, errors.New("invalid verification code")
+            return nil, &common.HTTPError{
+                StatusCode: http.StatusBadRequest,
+                Message:    "invalid verification code",
+            }
         }
-        return nil, fmt.Errorf("unable to retrieve verification code: %v", err)
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to retrieve verification code: %v", err),
+        }
     }
 
     jwtStr, err := common.JWTFromContext(ctx)
     if err != nil {
-        return nil, fmt.Errorf("unable to retrieve JWT from context: %v", err)
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to retrieve JWT from context: %v", err),
+        }
     }
 
     verifyUserRequest := &user.VerifyUserRequest{
         UserId: int(dbCode.UserID),
     }
     if _, err := s.UserClient.VerifyUser(verifyUserRequest, jwtStr); err != nil {
-        return nil, fmt.Errorf("unable to verify user: %v", err)
+        return nil, &common.HTTPError{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to verify user: %v", err),
+        }
     }
 
     return &api.VerifyEmailResponse{}, nil
