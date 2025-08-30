@@ -87,3 +87,13 @@ func JWTFromContext(ctx context.Context) (string, error) {
 	}
 	return jwt, nil
 }
+
+// HandleError Write the appropriate response given an error
+func HandleError(err error, w http.ResponseWriter) {
+	var httpErr *HTTPError
+	if errors.As(err, &httpErr) {
+		http.Error(w, httpErr.Error(), httpErr.StatusCode)
+	} else {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}

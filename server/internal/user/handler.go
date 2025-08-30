@@ -4,7 +4,6 @@ import (
 	"common"
 	api "common/api/user"
 	"encoding/json"
-	"errors"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 	"strconv"
@@ -15,18 +14,18 @@ func CreateUserHandler(service Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var request api.CreateUserRequest
 		if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
 		if err := ValidateCreateUserRequest(&request, service, r.Context()); err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
 		response, err := service.CreateUser(r.Context(), &request)
 		if err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
@@ -73,18 +72,18 @@ func GetUserHandler(service Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		request, err := generateGetUserRequest(r)
 		if err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
 		if err := ValidateGetUserRequest(request); err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
 		response, err := service.GetUser(r.Context(), request)
 		if err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
@@ -101,18 +100,18 @@ func GetUsersHandler(service Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		request, err := generateGetUsersRequest(r)
 		if err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
 		if err := ValidateGetUsersRequest(request); err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
 		response, err := service.GetUsers(r.Context(), request)
 		if err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
@@ -129,18 +128,18 @@ func UpdateUserHandler(service Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		request, err := generateUpdateUserRequest(r)
 		if err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
 		if err := ValidateUpdateUserRequest(request, service, r.Context()); err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
 		response, err := service.UpdateUser(r.Context(), request)
 		if err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
@@ -157,18 +156,18 @@ func DeleteUserHandler(service Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		request, err := generateDeleteUserRequest(r)
 		if err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
 		if err := ValidateDeleteUserRequest(request, service, r.Context()); err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
 		response, err := service.DeleteUser(r.Context(), request)
 		if err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
@@ -185,18 +184,18 @@ func VerifyUserHandler(service Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		request, err := generateVerifyUserRequest(r)
 		if err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
 		if err := ValidateVerifyUserRequest(request, service, r.Context()); err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
 		response, err := service.VerifyUser(r.Context(), request)
 		if err != nil {
-			handleError(err, w)
+			common.HandleError(err, w)
 			return
 		}
 
@@ -326,14 +325,4 @@ func generateVerifyUserRequest(r *http.Request) (*api.VerifyUserRequest, error) 
 	request.UserId = userId
 
 	return &request, nil
-}
-
-// handleError Write the appropriate response given an error
-func handleError(err error, w http.ResponseWriter) {
-	var httpErr *common.HTTPError
-	if errors.As(err, &httpErr) {
-		http.Error(w, httpErr.Error(), httpErr.StatusCode)
-	} else {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
 }
