@@ -28,4 +28,5 @@ type SendVerificationEmailResponse struct {
 }
 
 type VerifyEmailResponse struct {
+	UserId int `json:"userId"`
 }

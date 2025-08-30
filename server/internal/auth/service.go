@@ -279,8 +279,9 @@ func (s *ServiceImpl) VerifyEmail(ctx context.Context, request *api.VerifyEmailR
         }
     }
 
+    userId := int(dbCode.UserID)
     verifyUserRequest := &user.VerifyUserRequest{
-        UserId: int(dbCode.UserID),
+        UserId: userId,
     }
     if _, err := s.UserClient.VerifyUser(verifyUserRequest, jwtStr); err != nil {
         return nil, &common.HTTPError{
@@ -289,7 +290,9 @@ func (s *ServiceImpl) VerifyEmail(ctx context.Context, request *api.VerifyEmailR
         }
     }
 
-    return &api.VerifyEmailResponse{}, nil
+    return &api.VerifyEmailResponse{
+        UserId: userId,
+    }, nil
 }
 
 func (s *ServiceImpl) generateRefreshToken(ctx context.Context, userId int) (string, error) {
