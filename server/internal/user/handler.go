@@ -3,6 +3,7 @@ package user
 import (
 	"common"
 	api "common/api/user"
+	"common/errors"
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"net/http"
@@ -215,7 +216,7 @@ func generateGetUserRequest(r *http.Request) (*api.GetUserRequest, error) {
 	if userIdStr := query.Get(api.UserIdKey); userIdStr != "" {
 		userId, err := strconv.Atoi(userIdStr)
 		if err != nil {
-			return nil, &common.HTTPError{
+			return nil, &errors.HTTP{
 				StatusCode: http.StatusBadRequest,
 				Message:    "invalid user id",
 			}
@@ -242,7 +243,7 @@ func generateGetUsersRequest(r *http.Request) (*api.GetUsersRequest, error) {
 	if limitStr := query.Get(api.LimitKey); limitStr != "" {
 		limit, err := strconv.Atoi(limitStr)
 		if err != nil {
-			return nil, &common.HTTPError{
+			return nil, &errors.HTTP{
 				StatusCode: http.StatusBadRequest,
 				Message:    "invalid limit",
 			}
@@ -253,7 +254,7 @@ func generateGetUsersRequest(r *http.Request) (*api.GetUsersRequest, error) {
 	if offsetStr := query.Get(api.OffsetKey); offsetStr != "" {
 		offset, err := strconv.Atoi(offsetStr)
 		if err != nil {
-			return nil, &common.HTTPError{
+			return nil, &errors.HTTP{
 				StatusCode: http.StatusBadRequest,
 				Message:    "invalid offset",
 			}
@@ -278,7 +279,7 @@ func generateUpdateUserRequest(r *http.Request) (*api.UpdateUserRequest, error) 
 
 	userId, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		return nil, &common.HTTPError{
+		return nil, &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "invalid user id",
 		}
@@ -286,7 +287,7 @@ func generateUpdateUserRequest(r *http.Request) (*api.UpdateUserRequest, error) 
 	request.UserId = userId
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		return nil, &common.HTTPError{
+		return nil, &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "invalid request body: " + err.Error(),
 		}
@@ -301,7 +302,7 @@ func generateDeleteUserRequest(r *http.Request) (*api.DeleteUserRequest, error) 
 
 	userId, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		return nil, &common.HTTPError{
+		return nil, &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "invalid user id",
 		}
@@ -317,7 +318,7 @@ func generateVerifyUserRequest(r *http.Request) (*api.VerifyUserRequest, error) 
 
 	userId, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		return nil, &common.HTTPError{
+		return nil, &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "invalid user id",
 		}

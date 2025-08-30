@@ -1,8 +1,8 @@
 package user
 
 import (
-	"common"
 	api "common/api/user"
+	"common/errors"
 	"context"
 	"fmt"
 	"net/http"
@@ -48,14 +48,14 @@ func ValidateCreateUserRequest(request *api.CreateUserRequest, service Service, 
 // ValidateGetUserRequest Validate request for retrieving a user
 func ValidateGetUserRequest(request *api.GetUserRequest) error {
 	if request.UserId == nil && request.Username == nil && request.Email == nil {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "ID, username, or email is required",
 		}
 	}
 
 	if request.UserId != nil && *request.UserId < 0 {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "invalid user id",
 		}
@@ -67,14 +67,14 @@ func ValidateGetUserRequest(request *api.GetUserRequest) error {
 // ValidateGetUsersRequest Validate request for retrieving paginated users
 func ValidateGetUsersRequest(request *api.GetUsersRequest) error {
 	if request.Limit != nil && *request.Limit <= 0 {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "limit must be a positive number",
 		}
 	}
 
 	if request.Offset != nil && *request.Offset < 0 {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "offset must be a positive number",
 		}
@@ -92,7 +92,7 @@ func ValidateGetUsersRequest(request *api.GetUsersRequest) error {
 		}
 
 		if !sortFieldExists {
-			return &common.HTTPError{
+			return &errors.HTTP{
 				StatusCode: http.StatusBadRequest,
 				Message:    "invalid sort field",
 			}
@@ -103,7 +103,7 @@ func ValidateGetUsersRequest(request *api.GetUsersRequest) error {
 		*request.SortDirection,
 		"desc",
 	) && !strings.EqualFold(*request.SortDirection, "asc")) {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "invalid sort direction",
 		}
@@ -115,7 +115,7 @@ func ValidateGetUsersRequest(request *api.GetUsersRequest) error {
 // ValidateUpdateUserRequest Validate request for updating a user
 func ValidateUpdateUserRequest(request *api.UpdateUserRequest, service Service, context context.Context) error {
 	if request.UserId < 0 {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "invalid user id",
 		}
@@ -123,7 +123,7 @@ func ValidateUpdateUserRequest(request *api.UpdateUserRequest, service Service, 
 
 	getUserRequest := api.GetUserRequest{UserId: &request.UserId}
 	if response, _ := service.GetUser(context, &getUserRequest); response == nil {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusNotFound,
 			Message:    "user not found",
 		}
@@ -153,7 +153,7 @@ func ValidateUpdateUserRequest(request *api.UpdateUserRequest, service Service, 
 // ValidateDeleteUserRequest Validate request for deleting a user
 func ValidateDeleteUserRequest(request *api.DeleteUserRequest, service Service, context context.Context) error {
 	if request.UserId < 0 {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "invalid user id",
 		}
@@ -161,7 +161,7 @@ func ValidateDeleteUserRequest(request *api.DeleteUserRequest, service Service, 
 
 	getUserRequest := api.GetUserRequest{UserId: &request.UserId}
 	if response, _ := service.GetUser(context, &getUserRequest); response == nil {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusNotFound,
 			Message:    "user not found",
 		}
@@ -173,7 +173,7 @@ func ValidateDeleteUserRequest(request *api.DeleteUserRequest, service Service, 
 // ValidateVerifyUserRequest validates request for verifying user
 func ValidateVerifyUserRequest(request *api.VerifyUserRequest, service Service, context context.Context) error {
 	if request.UserId < 0 {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "invalid user id",
 		}
@@ -181,7 +181,7 @@ func ValidateVerifyUserRequest(request *api.VerifyUserRequest, service Service, 
 
 	getUserRequest := api.GetUserRequest{UserId: &request.UserId}
 	if response, _ := service.GetUser(context, &getUserRequest); response == nil {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusNotFound,
 			Message:    "user not found",
 		}
@@ -193,7 +193,7 @@ func ValidateVerifyUserRequest(request *api.VerifyUserRequest, service Service, 
 // validateUsername Validate a username
 func validateUsername(username string, service Service, context context.Context) error {
 	if len(username) < MinUsernameLength || len(username) > MaxUsernameLength {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message: fmt.Sprintf(
 				"username must be between %d and %d characters",
@@ -204,7 +204,7 @@ func validateUsername(username string, service Service, context context.Context)
 	}
 
 	if !usernameRegex.MatchString(username) {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "illegal character. username must contain only letters, numbers, underscores, and hyphens",
 		}
@@ -212,7 +212,7 @@ func validateUsername(username string, service Service, context context.Context)
 
 	getUserRequest := api.GetUserRequest{Username: &username}
 	if response, _ := service.GetUser(context, &getUserRequest); response != nil {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "username already exists",
 		}
@@ -224,7 +224,7 @@ func validateUsername(username string, service Service, context context.Context)
 // validateEmail Validate an email address
 func validateEmail(email string, service Service, context context.Context) error {
 	if !emailRegex.MatchString(email) {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "invalid email format",
 		}
@@ -232,7 +232,7 @@ func validateEmail(email string, service Service, context context.Context) error
 
 	getUserRequest := api.GetUserRequest{Email: &email}
 	if response, _ := service.GetUser(context, &getUserRequest); response != nil {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "email already exists",
 		}
@@ -244,7 +244,7 @@ func validateEmail(email string, service Service, context context.Context) error
 // validatePassword Validate a password
 func validatePassword(password string) error {
 	if len(password) < MinPasswordLength || len(password) > MaxPasswordLength {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message: fmt.Sprintf(
 				"password must be between %d and %d characters",
@@ -255,7 +255,7 @@ func validatePassword(password string) error {
 	}
 
 	if !hasUpper.MatchString(password) || !hasLower.MatchString(password) || !hasNumber.MatchString(password) || !hasSymbol.MatchString(password) {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message: "invalid password. Must contain at least one of each of the following: upper" +
 				" case English character, lower case English character, number, special character",
@@ -263,7 +263,7 @@ func validatePassword(password string) error {
 	}
 
 	if hasIllegalCharacters.MatchString(password) {
-		return &common.HTTPError{
+		return &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "password contains illegal characters",
 		}

@@ -1,10 +1,10 @@
 package user
 
 import (
-	"common"
 	api "common/api/user"
+	"common/errors"
 	"context"
-	"errors"
+	stderrors "errors"
 	"testing"
 )
 
@@ -75,8 +75,8 @@ func (m *mockService) VerifyUser(context context.Context, request *api.VerifyUse
 }
 
 func assertHTTPError(t *testing.T, err error, statusCode int) {
-	var httpErr *common.HTTPError
-	if ok := errors.As(err, &httpErr); !ok {
+	var httpErr *errors.HTTP
+	if ok := stderrors.As(err, &httpErr); !ok {
 		t.Errorf(`errors.As(err, &httpErr) = "%v", expected "true"`, ok)
 	}
 
