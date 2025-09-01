@@ -3,42 +3,39 @@ package user
 import (
 	api "common/api/user"
 	"common/errors"
+	"common/validate"
 	"context"
-	"fmt"
 	"net/http"
 	"reflect"
-	"regexp"
 	"strings"
 	"user/db/generated"
 )
 
-const (
-	MinUsernameLength = 3
-	MaxUsernameLength = 15
-	MinPasswordLength = 15
-	MaxPasswordLength = 64
-)
-
-var usernameRegex = regexp.MustCompile(`^[a-zA-Z0-9_-]{3,15}$`)
-var emailRegex = regexp.MustCompile(`^[\w\-.]+@([\w-]+\.)+[\w-]{2,}$`)
-var hasUpper = regexp.MustCompile(`[A-Z]`)
-var hasLower = regexp.MustCompile(`[a-z]`)
-var hasNumber = regexp.MustCompile(`[0-9]`)
-var hasSymbol = regexp.MustCompile(`[#?!@$%^&*-]`)
-var hasValidCharacters = regexp.MustCompile(`^[ -~]+$`)
-var hasIllegalCharacters = regexp.MustCompile(`[^ -~]`)
-
 // ValidateCreateUserRequest Validate request for creating a new user
 func ValidateCreateUserRequest(request *api.CreateUserRequest, service Service, context context.Context) error {
-	if err := validateUsername(request.Username, service, context); err != nil {
+	username := request.Username
+	if err := validate.Username(username); err != nil {
 		return err
 	}
-
-	if err := validateEmail(request.Email, service, context); err != nil {
-		return err
+	if !isUniqueUsername(username, service, context) {
+		return &errors.HTTP{
+			StatusCode: http.StatusBadRequest,
+			Message:    "duplicate username",
+		}
 	}
 
-	if err := validatePassword(request.Password); err != nil {
+	email := request.Email
+	if err := validate.Email(email); err != nil {
+		return err
+	}
+	if !isUniqueEmail(email, service, context) {
+		return &errors.HTTP{
+			StatusCode: http.StatusBadRequest,
+			Message:    "duplicate email",
+		}
+	}
+
+	if err := validate.Password(request.Password); err != nil {
 		return err
 	}
 
@@ -114,15 +111,16 @@ func ValidateGetUsersRequest(request *api.GetUsersRequest) error {
 
 // ValidateUpdateUserRequest Validate request for updating a user
 func ValidateUpdateUserRequest(request *api.UpdateUserRequest, service Service, context context.Context) error {
-	if request.UserId < 0 {
+	userId := request.UserId
+	if userId < 0 {
 		return &errors.HTTP{
 			StatusCode: http.StatusBadRequest,
 			Message:    "invalid user id",
 		}
 	}
 
-	getUserRequest := api.GetUserRequest{UserId: &request.UserId}
-	if response, _ := service.GetUser(context, &getUserRequest); response == nil {
+	getUserRequest := &api.GetUserRequest{UserId: &userId}
+	if response, _ := service.GetUser(context, getUserRequest); response == nil {
 		return &errors.HTTP{
 			StatusCode: http.StatusNotFound,
 			Message:    "user not found",
@@ -130,19 +128,33 @@ func ValidateUpdateUserRequest(request *api.UpdateUserRequest, service Service, 
 	}
 
 	if request.Username != nil {
-		if err := validateUsername(*request.Username, service, context); err != nil {
+		username := *request.Username
+		if err := validate.Username(username); err != nil {
 			return err
+		}
+		if !isUniqueUsername(username, service, context) {
+			return &errors.HTTP{
+				StatusCode: http.StatusBadRequest,
+				Message:    "duplicate username",
+			}
 		}
 	}
 
 	if request.Email != nil {
-		if err := validateEmail(*request.Email, service, context); err != nil {
+		email := *request.Email
+		if err := validate.Email(email); err != nil {
 			return err
+		}
+		if !isUniqueEmail(email, service, context) {
+			return &errors.HTTP{
+				StatusCode: http.StatusBadRequest,
+				Message:    "duplicate email",
+			}
 		}
 	}
 
 	if request.Password != nil {
-		if err := validatePassword(*request.Password); err != nil {
+		if err := validate.Password(*request.Password); err != nil {
 			return err
 		}
 	}
@@ -190,84 +202,16 @@ func ValidateVerifyUserRequest(request *api.VerifyUserRequest, service Service, 
 	return nil
 }
 
-// validateUsername Validate a username
-func validateUsername(username string, service Service, context context.Context) error {
-	if len(username) < MinUsernameLength || len(username) > MaxUsernameLength {
-		return &errors.HTTP{
-			StatusCode: http.StatusBadRequest,
-			Message: fmt.Sprintf(
-				"username must be between %d and %d characters",
-				MinUsernameLength,
-				MaxUsernameLength,
-			),
-		}
-	}
-
-	if !usernameRegex.MatchString(username) {
-		return &errors.HTTP{
-			StatusCode: http.StatusBadRequest,
-			Message:    "illegal character. username must contain only letters, numbers, underscores, and hyphens",
-		}
-	}
-
+// isUniqueUsername determines if a username is already in use
+func isUniqueUsername(username string, service Service, ctx context.Context) bool {
 	getUserRequest := api.GetUserRequest{Username: &username}
-	if response, _ := service.GetUser(context, &getUserRequest); response != nil {
-		return &errors.HTTP{
-			StatusCode: http.StatusBadRequest,
-			Message:    "username already exists",
-		}
-	}
-
-	return nil
+	response, _ := service.GetUser(ctx, &getUserRequest)
+	return response == nil
 }
 
-// validateEmail Validate an email address
-func validateEmail(email string, service Service, context context.Context) error {
-	if !emailRegex.MatchString(email) {
-		return &errors.HTTP{
-			StatusCode: http.StatusBadRequest,
-			Message:    "invalid email format",
-		}
-	}
-
+// isUniqueEmail determines if an email address is already in use
+func isUniqueEmail(email string, service Service, ctx context.Context) bool {
 	getUserRequest := api.GetUserRequest{Email: &email}
-	if response, _ := service.GetUser(context, &getUserRequest); response != nil {
-		return &errors.HTTP{
-			StatusCode: http.StatusBadRequest,
-			Message:    "email already exists",
-		}
-	}
-
-	return nil
-}
-
-// validatePassword Validate a password
-func validatePassword(password string) error {
-	if len(password) < MinPasswordLength || len(password) > MaxPasswordLength {
-		return &errors.HTTP{
-			StatusCode: http.StatusBadRequest,
-			Message: fmt.Sprintf(
-				"password must be between %d and %d characters",
-				MinPasswordLength,
-				MaxPasswordLength,
-			),
-		}
-	}
-
-	if !hasUpper.MatchString(password) || !hasLower.MatchString(password) || !hasNumber.MatchString(password) || !hasSymbol.MatchString(password) {
-		return &errors.HTTP{
-			StatusCode: http.StatusBadRequest,
-			Message: "invalid password. Must contain at least one of each of the following: upper" +
-				" case English character, lower case English character, number, special character",
-		}
-	}
-
-	if hasIllegalCharacters.MatchString(password) {
-		return &errors.HTTP{
-			StatusCode: http.StatusBadRequest,
-			Message:    "password contains illegal characters",
-		}
-	}
-
-	return nil
+	response, _ := service.GetUser(ctx, &getUserRequest)
+	return response == nil
 }
