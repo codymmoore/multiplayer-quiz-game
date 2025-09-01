@@ -3,6 +3,7 @@ package user
 import (
 	"common"
 	api "common/api/user"
+	"common/test"
 	"context"
 	"encoding/json"
 	"errors"
@@ -31,9 +32,9 @@ func TestCreateUserHandler_Success(t *testing.T) {
 
 	payload := fmt.Sprintf(
 		`{"username": "%s", "email": "%s", "password": "%s"}`,
-		ValidUsername,
-		ValidEmail,
-		ValidPassword,
+		test.ValidUsername,
+		test.ValidEmail,
+		test.ValidPassword,
 	)
 	request := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(payload))
 	recorder := httptest.NewRecorder()
@@ -97,9 +98,9 @@ func TestCreateUserHandler_InvalidRequestObject(t *testing.T) {
 
 	payload := fmt.Sprintf(
 		`{"username": "%s", "email": "%s", "password": "%s"}`,
-		ValidUsername,
-		ValidEmail,
-		ValidPassword,
+		test.ValidUsername,
+		test.ValidEmail,
+		test.ValidPassword,
 	)
 	request := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(payload))
 	recorder := httptest.NewRecorder()
@@ -128,9 +129,9 @@ func TestCreateUserHandler_ServiceFailure(t *testing.T) {
 
 	payload := fmt.Sprintf(
 		`{"username": "%s", "email": "%s", "password": "%s"}`,
-		ValidUsername,
-		ValidEmail,
-		ValidPassword,
+		test.ValidUsername,
+		test.ValidEmail,
+		test.ValidPassword,
 	)
 	request := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(payload))
 	recorder := httptest.NewRecorder()
@@ -148,9 +149,9 @@ func TestGetCurrentUserHandler_Success(t *testing.T) {
 	currentTime := time.Now()
 	mockResponse := api.GetUserResponse{
 		UserId:       1,
-		Username:     ValidUsername,
-		Email:        ValidEmail,
-		PasswordHash: ValidPassword,
+		Username:     test.ValidUsername,
+		Email:        test.ValidEmail,
+		PasswordHash: test.ValidPassword,
 		IsVerified:   true,
 		CreatedAt:    currentTime,
 		UpdatedAt:    currentTime,
@@ -163,8 +164,8 @@ func TestGetCurrentUserHandler_Success(t *testing.T) {
 
 	userClaims := &common.UserClaims{
 		ID:       1,
-		Username: ValidUsername,
-		Email:    ValidEmail,
+		Username: test.ValidUsername,
+		Email:    test.ValidEmail,
 	}
 	ctx := context.WithValue(context.Background(), common.UserClaimsCtxKey, userClaims)
 	request := httptest.NewRequestWithContext(ctx, http.MethodGet, "/user/me", strings.NewReader(""))
@@ -189,9 +190,9 @@ func TestGetCurrentUserHandler_MissingUserClaims(t *testing.T) {
 	currentTime := time.Now()
 	mockResponse := api.GetUserResponse{
 		UserId:       1,
-		Username:     ValidUsername,
-		Email:        ValidEmail,
-		PasswordHash: ValidPassword,
+		Username:     test.ValidUsername,
+		Email:        test.ValidEmail,
+		PasswordHash: test.ValidPassword,
 		IsVerified:   true,
 		CreatedAt:    currentTime,
 		UpdatedAt:    currentTime,
@@ -223,8 +224,8 @@ func TestGetCurrentUserHandler_ServiceFailure(t *testing.T) {
 
 	userClaims := &common.UserClaims{
 		ID:       1,
-		Username: ValidUsername,
-		Email:    ValidEmail,
+		Username: test.ValidUsername,
+		Email:    test.ValidEmail,
 	}
 	ctx := context.WithValue(context.Background(), common.UserClaimsCtxKey, userClaims)
 	request := httptest.NewRequestWithContext(ctx, http.MethodGet, "/user/me", strings.NewReader(""))
@@ -248,8 +249,8 @@ func TestGetCurrentUserHandler_UserNotFound(t *testing.T) {
 
 	userClaims := &common.UserClaims{
 		ID:       1,
-		Username: ValidUsername,
-		Email:    ValidEmail,
+		Username: test.ValidUsername,
+		Email:    test.ValidEmail,
 	}
 	ctx := context.WithValue(context.Background(), common.UserClaimsCtxKey, userClaims)
 	request := httptest.NewRequestWithContext(ctx, http.MethodGet, "/user/me", strings.NewReader(""))
@@ -266,14 +267,14 @@ func TestGetCurrentUserHandler_UserNotFound(t *testing.T) {
 
 func TestGetUserHandler_Success(t *testing.T) {
 	userId := 1
-	username := ValidUsername
-	email := ValidEmail
+	username := test.ValidUsername
+	email := test.ValidEmail
 	currentTime := time.Now()
 	mockResponse := api.GetUserResponse{
 		UserId:       userId,
 		Username:     username,
 		Email:        email,
-		PasswordHash: ValidPassword,
+		PasswordHash: test.ValidPassword,
 		IsVerified:   true,
 		CreatedAt:    currentTime,
 		UpdatedAt:    currentTime,
@@ -304,14 +305,14 @@ func TestGetUserHandler_Success(t *testing.T) {
 }
 
 func TestGetUserHandler_RequestGenerationError_InvalidUserId(t *testing.T) {
-	username := ValidUsername
-	email := ValidEmail
+	username := test.ValidUsername
+	email := test.ValidEmail
 	currentTime := time.Now()
 	mockResponse := api.GetUserResponse{
 		UserId:       1,
 		Username:     username,
 		Email:        email,
-		PasswordHash: ValidPassword,
+		PasswordHash: test.ValidPassword,
 		IsVerified:   true,
 		CreatedAt:    currentTime,
 		UpdatedAt:    currentTime,
@@ -337,14 +338,14 @@ func TestGetUserHandler_RequestGenerationError_InvalidUserId(t *testing.T) {
 
 func TestGetUserHandler_InvalidRequest(t *testing.T) {
 	userId := -1
-	username := ValidUsername
-	email := ValidEmail
+	username := test.ValidUsername
+	email := test.ValidEmail
 	currentTime := time.Now()
 	mockResponse := api.GetUserResponse{
 		UserId:       userId,
 		Username:     username,
 		Email:        email,
-		PasswordHash: ValidPassword,
+		PasswordHash: test.ValidPassword,
 		IsVerified:   true,
 		CreatedAt:    currentTime,
 		UpdatedAt:    currentTime,
@@ -375,7 +376,7 @@ func TestGetUserHandler_ServiceFailure(t *testing.T) {
 		},
 	}
 
-	urlString := fmt.Sprintf("/user?id=%d&username=%s&email=%s", 1, ValidUsername, ValidEmail)
+	urlString := fmt.Sprintf("/user?id=%d&username=%s&email=%s", 1, test.ValidUsername, test.ValidEmail)
 	request := httptest.NewRequest(http.MethodGet, urlString, strings.NewReader(""))
 	recorder := httptest.NewRecorder()
 
@@ -392,9 +393,9 @@ func TestGetUsersHandler_Success(t *testing.T) {
 	currentTime := time.Now()
 	mockUser := api.User{
 		UserId:       1,
-		Username:     ValidUsername,
-		Email:        ValidEmail,
-		PasswordHash: ValidPassword,
+		Username:     test.ValidUsername,
+		Email:        test.ValidEmail,
+		PasswordHash: test.ValidPassword,
 		IsVerified:   true,
 		CreatedAt:    currentTime,
 		UpdatedAt:    currentTime,
@@ -447,9 +448,9 @@ func TestGetUsersHandler_RequestGenerationError_InvalidLimit(t *testing.T) {
 	currentTime := time.Now()
 	mockUser := api.User{
 		UserId:       1,
-		Username:     ValidUsername,
-		Email:        ValidEmail,
-		PasswordHash: ValidPassword,
+		Username:     test.ValidUsername,
+		Email:        test.ValidEmail,
+		PasswordHash: test.ValidPassword,
 		IsVerified:   true,
 		CreatedAt:    currentTime,
 		UpdatedAt:    currentTime,
@@ -491,9 +492,9 @@ func TestGetUsersHandler_RequestGenerationError_InvalidOffset(t *testing.T) {
 	currentTime := time.Now()
 	mockUser := api.User{
 		UserId:       1,
-		Username:     ValidUsername,
-		Email:        ValidEmail,
-		PasswordHash: ValidPassword,
+		Username:     test.ValidUsername,
+		Email:        test.ValidEmail,
+		PasswordHash: test.ValidPassword,
 		IsVerified:   true,
 		CreatedAt:    currentTime,
 		UpdatedAt:    currentTime,
@@ -535,9 +536,9 @@ func TestGetUsersHandler_InvalidRequest(t *testing.T) {
 	currentTime := time.Now()
 	mockUser := api.User{
 		UserId:       1,
-		Username:     ValidUsername,
-		Email:        ValidEmail,
-		PasswordHash: ValidPassword,
+		Username:     test.ValidUsername,
+		Email:        test.ValidEmail,
+		PasswordHash: test.ValidPassword,
 		IsVerified:   true,
 		CreatedAt:    currentTime,
 		UpdatedAt:    currentTime,
@@ -597,9 +598,9 @@ func TestUpdateUserHandler_Success(t *testing.T) {
 	currentTime := time.Now()
 	mockUser := api.UpdateUserResponse{
 		UserId:       userId,
-		Username:     ValidUsername,
-		Email:        ValidEmail,
-		PasswordHash: ValidPassword,
+		Username:     test.ValidUsername,
+		Email:        test.ValidEmail,
+		PasswordHash: test.ValidPassword,
 		IsVerified:   true,
 		CreatedAt:    currentTime,
 		UpdatedAt:    currentTime,
@@ -623,9 +624,9 @@ func TestUpdateUserHandler_Success(t *testing.T) {
 
 	payload := fmt.Sprintf(
 		`{"username": "%s", "email": "%s", "password": "%s"}`,
-		ValidUsername,
-		ValidEmail,
-		ValidPassword,
+		test.ValidUsername,
+		test.ValidEmail,
+		test.ValidPassword,
 	)
 	urlString := fmt.Sprintf("/user/%d", userId)
 	request := httptest.NewRequest(http.MethodPatch, urlString, strings.NewReader(payload))
@@ -651,9 +652,9 @@ func TestUpdateUserHandler_RequestGenerationError_InvalidUserId(t *testing.T) {
 	currentTime := time.Now()
 	mockUser := api.UpdateUserResponse{
 		UserId:       userId,
-		Username:     ValidUsername,
-		Email:        ValidEmail,
-		PasswordHash: ValidPassword,
+		Username:     test.ValidUsername,
+		Email:        test.ValidEmail,
+		PasswordHash: test.ValidPassword,
 		IsVerified:   true,
 		CreatedAt:    currentTime,
 		UpdatedAt:    currentTime,
@@ -677,9 +678,9 @@ func TestUpdateUserHandler_RequestGenerationError_InvalidUserId(t *testing.T) {
 
 	payload := fmt.Sprintf(
 		`{"username": "%s", "email": "%s", "password": "%s"}`,
-		ValidUsername,
-		ValidEmail,
-		ValidPassword,
+		test.ValidUsername,
+		test.ValidEmail,
+		test.ValidPassword,
 	)
 	urlString := fmt.Sprintf("/user/%s", "invalidId")
 	request := httptest.NewRequest(http.MethodPatch, urlString, strings.NewReader(payload))
@@ -699,9 +700,9 @@ func TestUpdateUserHandler_RequestGenerationError_InvalidRequestBody(t *testing.
 	currentTime := time.Now()
 	mockUser := api.UpdateUserResponse{
 		UserId:       userId,
-		Username:     ValidUsername,
-		Email:        ValidEmail,
-		PasswordHash: ValidPassword,
+		Username:     test.ValidUsername,
+		Email:        test.ValidEmail,
+		PasswordHash: test.ValidPassword,
 		IsVerified:   true,
 		CreatedAt:    currentTime,
 		UpdatedAt:    currentTime,
@@ -742,9 +743,9 @@ func TestUpdateUserHandler_InvalidRequest(t *testing.T) {
 	currentTime := time.Now()
 	mockUser := api.UpdateUserResponse{
 		UserId:       userId,
-		Username:     ValidUsername,
-		Email:        ValidEmail,
-		PasswordHash: ValidPassword,
+		Username:     test.ValidUsername,
+		Email:        test.ValidEmail,
+		PasswordHash: test.ValidPassword,
 		IsVerified:   true,
 		CreatedAt:    currentTime,
 		UpdatedAt:    currentTime,
@@ -768,9 +769,9 @@ func TestUpdateUserHandler_InvalidRequest(t *testing.T) {
 
 	payload := fmt.Sprintf(
 		`{"username": "%s", "email": "%s", "password": "%s"}`,
-		ValidUsername,
-		ValidEmail,
-		ValidPassword,
+		test.ValidUsername,
+		test.ValidEmail,
+		test.ValidPassword,
 	)
 	urlString := fmt.Sprintf("/user/%d", userId)
 	request := httptest.NewRequest(http.MethodPatch, urlString, strings.NewReader(payload))
@@ -805,9 +806,9 @@ func TestUpdateUserHandler_ServiceFailure(t *testing.T) {
 
 	payload := fmt.Sprintf(
 		`{"username": "%s", "email": "%s", "password": "%s"}`,
-		ValidUsername,
-		ValidEmail,
-		ValidPassword,
+		test.ValidUsername,
+		test.ValidEmail,
+		test.ValidPassword,
 	)
 	urlString := fmt.Sprintf("/user/%d", userId)
 	request := httptest.NewRequest(http.MethodPatch, urlString, strings.NewReader(payload))
@@ -1038,8 +1039,8 @@ func TestVerifyUserHandler_ServiceFailure(t *testing.T) {
 
 func TestGenerateGetUsersRequest_Success(t *testing.T) {
 	userId := 1
-	username := ValidUsername
-	email := ValidEmail
+	username := test.ValidUsername
+	email := test.ValidEmail
 
 	urlString := fmt.Sprintf("/user?id=%d&username=%s&email=%s", userId, username, email)
 	request := httptest.NewRequest(http.MethodGet, urlString, strings.NewReader(""))

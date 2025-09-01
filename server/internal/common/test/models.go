@@ -1,15 +1,10 @@
-package api
+package test
 
 import (
 	"net/http"
 )
 
-const (
-	ValidUsername = "test-username"
-	ValidEmail    = "test@email.com"
-	ValidPassword = "testPassword1234#?!@$%^&*-"
-)
-
+// MockRoundTripper RoundTripper implementation used for mocking http.Client
 type MockRoundTripper struct {
 	RoundTripFunc func(req *http.Request) (*http.Response, error)
 }

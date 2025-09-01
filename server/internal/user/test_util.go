@@ -2,16 +2,7 @@ package user
 
 import (
 	api "common/api/user"
-	"common/errors"
 	"context"
-	stderrors "errors"
-	"testing"
-)
-
-const (
-	ValidUsername = "test-username"
-	ValidEmail    = "test@email.com"
-	ValidPassword = "testPassword1234#?!@$%^&*-"
 )
 
 type mockService struct {
@@ -72,15 +63,4 @@ func (m *mockService) VerifyUser(context context.Context, request *api.VerifyUse
 	error,
 ) {
 	return m.verifyUserFunc(context, request)
-}
-
-func assertHTTPError(t *testing.T, err error, statusCode int) {
-	var httpErr *errors.HTTP
-	if ok := stderrors.As(err, &httpErr); !ok {
-		t.Errorf(`errors.As(err, &httpErr) = "%v", expected "true"`, ok)
-	}
-
-	if httpErr.StatusCode != statusCode {
-		t.Errorf(`httpErr.StatusCode = "%d", expected "%d"`, httpErr.StatusCode, statusCode)
-	}
 }
