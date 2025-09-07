@@ -30,3 +30,4 @@ go.work.sum
 
 # Generated files
 **/generated/
+newman/

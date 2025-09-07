@@ -1,8 +1,8 @@
 package common
 
 import (
-    "github.com/go-chi/jwtauth/v5"
+	"github.com/go-chi/jwtauth/v5"
 )
 
-var JWTSecret *string
+var JWTSecret []byte
 var TokenAuth *jwtauth.JWTAuth

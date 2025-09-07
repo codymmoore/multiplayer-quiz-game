@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-// GenerateJWT generates a JWT with the specified user info
-func GenerateJWT(userId int, username string, email string) (string, error) {
+// GenerateJWTToken generates a jwt.Token with the specified user info
+func GenerateJWTToken(userId int, username string, email string) (jwt.Token, error) {
 	token, err := jwt.NewBuilder().
 		Issuer("quizchief-auth").
 		Subject(username).
@@ -20,15 +20,9 @@ func GenerateJWT(userId int, username string, email string) (string, error) {
 		Claim(common.EmailClaimsKey, email).
 		Build()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-
-	signedToken, err := jwt.Sign(token, jwt.WithKey(common.JWTAlg, common.JWTSecret))
-	if err != nil {
-		return "", err
-	}
-
-	return string(signedToken), nil
+	return token, nil
 }
 
 // SecureHash creates a SHA256 hash for the specified

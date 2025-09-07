@@ -12,6 +12,7 @@ import (
     stderrors "errors"
     "fmt"
     "github.com/keighl/postmark"
+    "github.com/lestrrat-go/jwx/v2/jwt"
     "golang.org/x/crypto/bcrypt"
     "net/http"
 )
@@ -34,7 +35,7 @@ type ServiceImpl struct {
     Queries        db.Querier
     BaseUrl        string
     UserClient     user.Client
-    PostmarkClient postmark.Client
+    PostmarkClient *postmark.Client
 }
 
 // Login provides JWT for a user
@@ -43,10 +44,11 @@ func (s *ServiceImpl) Login(ctx context.Context, request *api.LoginRequest) (*ap
     jwtStr, err := common.JWTFromContext(ctx)
     if err != nil {
         return nil, &errors.HTTP{
-            StatusCode: http.StatusInternalServerError,
+            StatusCode: http.StatusUnauthorized,
             Message:    fmt.Sprintf("unable to retrieve JWT from context: %v", err),
         }
     }
+
     usr, err := s.UserClient.GetUser(getUserRequest, jwtStr)
     if err != nil {
         var httpErr *errors.HTTP
@@ -69,11 +71,19 @@ func (s *ServiceImpl) Login(ctx context.Context, request *api.LoginRequest) (*ap
         }
     }
 
-    accessToken, err := GenerateJWT(usr.UserId, usr.Username, usr.Email)
+    token, err := GenerateJWTToken(usr.UserId, usr.Username, usr.Email)
     if err != nil {
         return nil, &errors.HTTP{
             StatusCode: http.StatusInternalServerError,
             Message:    fmt.Sprintf("unable to generate JWT: %v", err),
+        }
+    }
+
+    signedToken, err := jwt.Sign(token, jwt.WithKey(common.JWTAlg, common.JWTSecret))
+    if err != nil {
+        return nil, &errors.HTTP{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to sign JWT: %v", err),
         }
     }
 
@@ -86,8 +96,15 @@ func (s *ServiceImpl) Login(ctx context.Context, request *api.LoginRequest) (*ap
     }
 
     return &api.LoginResponse{
-        AccessToken:  accessToken,
+        AccessToken:  string(signedToken),
         RefreshToken: refreshToken,
+        IssuedAt:     token.IssuedAt(),
+        ExpiresIn:    token.Expiration().Sub(token.IssuedAt()),
+        User: api.User{
+            UserId:   usr.UserId,
+            Username: usr.Username,
+            Email:    usr.Email,
+        },
     }, nil
 }
 
@@ -108,7 +125,7 @@ func (s *ServiceImpl) Logout(ctx context.Context, request *api.LogoutRequest) (*
     userClaims, ok := ctx.Value(common.UserClaimsCtxKey).(common.UserClaims)
     if !ok {
         return nil, &errors.HTTP{
-            StatusCode: http.StatusInternalServerError,
+            StatusCode: http.StatusUnauthorized,
             Message:    "unable to retrieve user claims",
         }
     }
@@ -150,7 +167,7 @@ func (s *ServiceImpl) Renew(ctx context.Context, request *api.RenewRequest) (*ap
     userClaims, ok := ctx.Value(common.UserClaimsCtxKey).(common.UserClaims)
     if !ok {
         return nil, &errors.HTTP{
-            StatusCode: http.StatusInternalServerError,
+            StatusCode: http.StatusUnauthorized,
             Message:    "unable to retrieve user claims",
         }
     }
@@ -162,11 +179,19 @@ func (s *ServiceImpl) Renew(ctx context.Context, request *api.RenewRequest) (*ap
         }
     }
 
-    accessToken, err := GenerateJWT(userClaims.ID, userClaims.Username, userClaims.Email)
+    token, err := GenerateJWTToken(userClaims.ID, userClaims.Username, userClaims.Email)
     if err != nil {
         return nil, &errors.HTTP{
             StatusCode: http.StatusInternalServerError,
             Message:    fmt.Sprintf("unable to generate JWT: %v", err),
+        }
+    }
+
+    signedToken, err := jwt.Sign(token, jwt.WithKey(common.JWTAlg, common.JWTSecret))
+    if err != nil {
+        return nil, &errors.HTTP{
+            StatusCode: http.StatusInternalServerError,
+            Message:    fmt.Sprintf("unable to sign JWT: %v", err),
         }
     }
 
@@ -186,8 +211,15 @@ func (s *ServiceImpl) Renew(ctx context.Context, request *api.RenewRequest) (*ap
     }
 
     return &api.RenewResponse{
-        AccessToken:  accessToken,
+        AccessToken:  string(signedToken),
         RefreshToken: newRefreshToken,
+        IssuedAt:     token.IssuedAt(),
+        ExpiresIn:    token.Expiration().Sub(token.IssuedAt()),
+        User: api.User{
+            UserId:   userClaims.ID,
+            Username: userClaims.Username,
+            Email:    userClaims.Email,
+        },
     }, nil
 }
 
@@ -200,10 +232,11 @@ func (s *ServiceImpl) SendVerificationEmail(
     jwtStr, err := common.JWTFromContext(ctx)
     if err != nil {
         return nil, &errors.HTTP{
-            StatusCode: http.StatusInternalServerError,
+            StatusCode: http.StatusUnauthorized,
             Message:    fmt.Sprintf("unable to retrieve JWT from context: %v", err),
         }
     }
+
     usr, err := s.UserClient.GetUser(getUserRequest, jwtStr)
     if err != nil {
         var httpErr *errors.HTTP
@@ -280,7 +313,7 @@ func (s *ServiceImpl) VerifyEmail(ctx context.Context, request *api.VerifyEmailR
     jwtStr, err := common.JWTFromContext(ctx)
     if err != nil {
         return nil, &errors.HTTP{
-            StatusCode: http.StatusInternalServerError,
+            StatusCode: http.StatusUnauthorized,
             Message:    fmt.Sprintf("unable to retrieve JWT from context: %v", err),
         }
     }
