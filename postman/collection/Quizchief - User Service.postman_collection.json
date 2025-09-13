@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "eb009ded-5b1e-4663-a547-c9f0accdb9b9",
+		"_postman_id": "28b89f58-a371-4a4e-b2c9-297a4ce06c6f",
 		"name": "Quizchief - User Service",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "36584833"
@@ -18,10 +18,12 @@
 								"exec": [
 									"const userIndex = Math.floor(100000 + Math.random() * 900000);\r",
 									"const username = `testUser-${userIndex}`;\r",
-									"const email = `${username}@test.com`\r",
+									"const email = `${username}@test.com`;\r",
+									"const password = `!arstrarafdxA4${userIndex}`;\r",
 									"\r",
-									"pm.collectionVariables.set(\"username\", username);\r",
-									"pm.collectionVariables.set(\"email\", email);\r",
+									"pm.environment.set(\"username\", username);\r",
+									"pm.environment.set(\"email\", email);\r",
+									"pm.environment.set(\"password\", password);\r",
 									"pm.collectionVariables.set(\"userIndex\", userIndex);"
 								],
 								"type": "text/javascript",
@@ -47,7 +49,7 @@
 									"if (userCount) {\r",
 									"    pm.execution.setNextRequest(\"Get Users\");\r",
 									"} else {\r",
-									"    pm.collectionVariables.set(\"userId\", responseJson.userId);\r",
+									"    pm.environment.set(\"userId\", responseJson.userId);\r",
 									"}"
 								],
 								"type": "text/javascript",
@@ -60,7 +62,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"{{username}}\",\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"testPassword1234$\"\r\n}",
+							"raw": "{\r\n    \"username\": \"{{username}}\",\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"{{password}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -68,9 +70,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user",
+							"raw": "{{userUrl}}/user",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user"
@@ -118,9 +120,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user",
+							"raw": "{{userUrl}}/user",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user"
@@ -168,9 +170,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user",
+							"raw": "{{userUrl}}/user",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user"
@@ -218,9 +220,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user",
+							"raw": "{{userUrl}}/user",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user"
@@ -268,9 +270,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user",
+							"raw": "{{userUrl}}/user",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user"
@@ -318,9 +320,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user",
+							"raw": "{{userUrl}}/user",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user"
@@ -368,9 +370,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user",
+							"raw": "{{userUrl}}/user",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user"
@@ -418,9 +420,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user",
+							"raw": "{{userUrl}}/user",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user"
@@ -468,9 +470,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user",
+							"raw": "{{userUrl}}/user",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user"
@@ -518,9 +520,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user",
+							"raw": "{{userUrl}}/user",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user"
@@ -562,10 +564,10 @@
 									"    pm.expect(responseJson.userId).to.be.a(\"number\");\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"username\");\r",
-									"    pm.expect(responseJson.username).to.equal(pm.collectionVariables.get(\"username\"));\r",
+									"    pm.expect(responseJson.username).to.equal(pm.environment.get(\"username\"));\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"email\");\r",
-									"    pm.expect(responseJson.email).to.equal(pm.collectionVariables.get(\"email\"));\r",
+									"    pm.expect(responseJson.email).to.equal(pm.environment.get(\"email\"));\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"passwordHash\");\r",
 									"    pm.expect(responseJson.passwordHash).to.be.a(\"string\");\r",
@@ -603,9 +605,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user?id={{userId}}",
+							"raw": "{{userUrl}}/user?id={{userId}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user"
@@ -648,10 +650,10 @@
 									"    pm.expect(responseJson.userId).to.be.a(\"number\");\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"username\");\r",
-									"    pm.expect(responseJson.username).to.equal(pm.collectionVariables.get(\"username\"));\r",
+									"    pm.expect(responseJson.username).to.equal(pm.environment.get(\"username\"));\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"email\");\r",
-									"    pm.expect(responseJson.email).to.equal(pm.collectionVariables.get(\"email\"));\r",
+									"    pm.expect(responseJson.email).to.equal(pm.environment.get(\"email\"));\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"passwordHash\");\r",
 									"    pm.expect(responseJson.passwordHash).to.be.a(\"string\");\r",
@@ -687,9 +689,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user?username={{username}}",
+							"raw": "{{userUrl}}/user?username={{username}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user"
@@ -732,10 +734,10 @@
 									"    pm.expect(responseJson.userId).to.be.a(\"number\");\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"username\");\r",
-									"    pm.expect(responseJson.username).to.equal(pm.collectionVariables.get(\"username\"));\r",
+									"    pm.expect(responseJson.username).to.equal(pm.environment.get(\"username\"));\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"email\");\r",
-									"    pm.expect(responseJson.email).to.equal(pm.collectionVariables.get(\"email\"));\r",
+									"    pm.expect(responseJson.email).to.equal(pm.environment.get(\"email\"));\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"passwordHash\");\r",
 									"    pm.expect(responseJson.passwordHash).to.be.a(\"string\");\r",
@@ -771,9 +773,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user?email={{email}}",
+							"raw": "{{userUrl}}/user?email={{email}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user"
@@ -830,9 +832,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user",
+							"raw": "{{userUrl}}/user",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user"
@@ -864,9 +866,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/me",
+							"raw": "{{userUrl}}/user/me",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -897,13 +899,13 @@
 									"\r",
 									"pm.test(\"Response is populated\", () => {\r",
 									"    pm.expect(responseJson).to.have.property(\"userId\");\r",
-									"    pm.expect(responseJson.userId).to.equal(pm.collectionVariables.get(\"userId\"));\r",
+									"    pm.expect(responseJson.userId).to.equal(pm.environment.get(\"userId\"));\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"username\");\r",
 									"    pm.expect(responseJson.username).to.equal(requestJson.username);\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"email\");\r",
-									"    pm.expect(responseJson.email).to.equal(pm.collectionVariables.get(\"email\"));\r",
+									"    pm.expect(responseJson.email).to.equal(pm.environment.get(\"email\"));\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"passwordHash\");\r",
 									"    pm.expect(responseJson.passwordHash).to.be.equal(pm.collectionVariables.get(\"passwordHash\"));\r",
@@ -916,7 +918,9 @@
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"updatedAt\");\r",
 									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
-									"});"
+									"});\r",
+									"\r",
+									"pm.environment.set(\"username\", requestJson.username);"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -929,7 +933,7 @@
 									"const userIndex = Number(pm.variables.get(\"userIndex\")) + 1;\r",
 									"const username = `testUser-${userIndex}`;\r",
 									"\r",
-									"pm.collectionVariables.set(\"username\", username);\r",
+									"pm.environment.set(\"username\", username);\r",
 									"pm.collectionVariables.set(\"userIndex\", userIndex);"
 								],
 								"type": "text/javascript",
@@ -950,9 +954,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/{{userId}}",
+							"raw": "{{userUrl}}/user/{{userId}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -978,10 +982,10 @@
 									"\r",
 									"pm.test(\"Response is populated\", () => {\r",
 									"    pm.expect(responseJson).to.have.property(\"userId\");\r",
-									"    pm.expect(responseJson.userId).to.equal(pm.collectionVariables.get(\"userId\"));\r",
+									"    pm.expect(responseJson.userId).to.equal(pm.environment.get(\"userId\"));\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"username\");\r",
-									"    pm.expect(responseJson.username).to.equal(pm.collectionVariables.get(\"username\"));\r",
+									"    pm.expect(responseJson.username).to.equal(pm.environment.get(\"username\"));\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"email\");\r",
 									"    pm.expect(responseJson.email).to.equal(requestBody.email);\r",
@@ -997,7 +1001,9 @@
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"updatedAt\");\r",
 									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
-									"});"
+									"});\r",
+									"\r",
+									"pm.environment.set(\"email\", requestBody.email)"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -1011,7 +1017,7 @@
 									"const username = `testUser-${userIndex}`;\r",
 									"const email = `${username}@test.com`\r",
 									"\r",
-									"pm.collectionVariables.set(\"email\", email);\r",
+									"pm.environment.set(\"email\", email);\r",
 									"pm.collectionVariables.set(\"userIndex\", userIndex + 1);"
 								],
 								"type": "text/javascript",
@@ -1032,9 +1038,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/{{userId}}",
+							"raw": "{{userUrl}}/user/{{userId}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -1060,13 +1066,13 @@
 									"\r",
 									"pm.test(\"Response is populated\", () => {\r",
 									"    pm.expect(responseJson).to.have.property(\"userId\");\r",
-									"    pm.expect(responseJson.userId).to.equal(pm.collectionVariables.get(\"userId\"));\r",
+									"    pm.expect(responseJson.userId).to.equal(pm.environment.get(\"userId\"));\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"username\");\r",
-									"    pm.expect(responseJson.username).to.equal(pm.collectionVariables.get(\"username\"));\r",
+									"    pm.expect(responseJson.username).to.equal(pm.environment.get(\"username\"));\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"email\");\r",
-									"    pm.expect(responseJson.email).to.equal(pm.collectionVariables.get(\"email\"));\r",
+									"    pm.expect(responseJson.email).to.equal(pm.environment.get(\"email\"));\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"passwordHash\");\r",
 									"    pm.expect(responseJson.passwordHash).to.not.equal(pm.collectionVariables.get(\"passwordHash\"));\r",
@@ -1079,7 +1085,9 @@
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"updatedAt\");\r",
 									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
-									"});"
+									"});\r",
+									"\r",
+									"pm.environment.set(\"password\", requestBody.password);"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -1101,7 +1109,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"password\": \"arstrartastA4!en\"\r\n}",
+							"raw": "{\r\n    \"password\": \"!arstrartastA4{{userIndex}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1109,9 +1117,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/{{userId}}",
+							"raw": "{{userUrl}}/user/{{userId}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -1152,7 +1160,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"{{$timestamp}}\",\r\n    \"email\": \"{{$timestamp}}@gmail.com\",\r\n    \"password\": \"testPassword1234$\"\r\n}",
+							"raw": "{\r\n    \"username\": \"{{$timestamp}}\",\r\n    \"email\": \"{{$timestamp}}@gmail.com\",\r\n    \"password\": \"{{password}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1160,9 +1168,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/9999",
+							"raw": "{{userUrl}}/user/9999",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -1211,9 +1219,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/-1",
+							"raw": "{{userUrl}}/user/-1",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -1262,9 +1270,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/abcd",
+							"raw": "{{userUrl}}/user/abcd",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -1313,9 +1321,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/{{userId}}",
+							"raw": "{{userUrl}}/user/{{userId}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -1364,9 +1372,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/{{userId}}",
+							"raw": "{{userUrl}}/user/{{userId}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -1415,9 +1423,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/{{userId}}",
+							"raw": "{{userUrl}}/user/{{userId}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -1466,9 +1474,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/{{userId}}",
+							"raw": "{{userUrl}}/user/{{userId}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -1517,9 +1525,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/{{userId}}",
+							"raw": "{{userUrl}}/user/{{userId}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -1568,9 +1576,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/{{userId}}",
+							"raw": "{{userUrl}}/user/{{userId}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -1619,9 +1627,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/{{userId}}",
+							"raw": "{{userUrl}}/user/{{userId}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -1670,9 +1678,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/{{userId}}",
+							"raw": "{{userUrl}}/user/{{userId}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -1721,9 +1729,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/{{userId}}",
+							"raw": "{{userUrl}}/user/{{userId}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -1789,13 +1797,13 @@
 									"    pm.execution.setNextRequest(\"Create User\");\r",
 									"}\r",
 									"\r",
-									"function getBaseUrl() {\r",
+									"function getuserUrl() {\r",
 									"    const url = pm.request.url.toString();\r",
 									"    const queryIndex = url.indexOf('?');\r",
-									"    const baseUrl = queryIndex !== -1\r",
+									"    const userUrl = queryIndex !== -1\r",
 									"        ? url.substring(0, queryIndex)\r",
 									"        : url;     \r",
-									"    return baseUrl;\r",
+									"    return userUrl;\r",
 									"}"
 								],
 								"type": "text/javascript",
@@ -1807,9 +1815,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/user/all",
+							"raw": "{{userUrl}}/user/all",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -1877,19 +1885,19 @@
 									"\r",
 									"    const limit = Number(queryParams.find(p => p.key === \"limit\"));\r",
 									"    const offset = Number(queryParams.find(p => p.key === \"offset\"));\r",
-									"    const baseUrl = getBaseUrl();\r",
+									"    const userUrl = getuserUrl();\r",
 									"    \r",
-									"    pm.expect(responseJson.prevLink).to.equal(`${baseUrl}?limit=${limit}&offset=${offset - limit}`);\r",
-									"    pm.expect(responseJson.nextLink).to.equal(`${baseUrl}?limit=${limit}&offset=${offset + limit}`);\r",
+									"    pm.expect(responseJson.prevLink).to.equal(`${userUrl}?limit=${limit}&offset=${offset - limit}`);\r",
+									"    pm.expect(responseJson.nextLink).to.equal(`${userUrl}?limit=${limit}&offset=${offset + limit}`);\r",
 									"});\r",
 									"\r",
-									"function getBaseUrl() {\r",
+									"function getuserUrl() {\r",
 									"    const url = pm.request.url.toString();\r",
 									"    const queryIndex = url.indexOf('?');\r",
-									"    const baseUrl = queryIndex !== -1\r",
+									"    const userUrl = queryIndex !== -1\r",
 									"        ? url.substring(0, queryIndex)\r",
 									"        : url;     \r",
-									"    return baseUrl;\r",
+									"    return userUrl;\r",
 									"}\r",
 									"\r",
 									"// negative limit\r",
@@ -1908,9 +1916,9 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{baseUrl}}/user/all?limit=1&offset=1&sortField=CreatedAt&sortDirection=desc",
+							"raw": "{{userUrl}}/user/all?limit=1&offset=1&sortField=CreatedAt&sortDirection=desc",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -1972,9 +1980,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/{{userId}}/verify",
+							"raw": "{{userUrl}}/user/{{userId}}/verify",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -2014,9 +2022,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/9999/verify",
+							"raw": "{{userUrl}}/user/9999/verify",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -2066,9 +2074,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/-1/verify",
+							"raw": "{{userUrl}}/user/-1/verify",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -2118,9 +2126,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/abcd/verify",
+							"raw": "{{userUrl}}/user/abcd/verify",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -2165,9 +2173,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/{{userId}}",
+							"raw": "{{userUrl}}/user/{{userId}}",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -2206,9 +2214,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/9999",
+							"raw": "{{userUrl}}/user/9999",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -2257,9 +2265,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/-1",
+							"raw": "{{userUrl}}/user/-1",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -2308,9 +2316,9 @@
 							}
 						},
 						"url": {
-							"raw": "{{baseUrl}}/user/abcd",
+							"raw": "{{userUrl}}/user/abcd",
 							"host": [
-								"{{baseUrl}}"
+								"{{userUrl}}"
 							],
 							"path": [
 								"user",
@@ -2343,29 +2351,6 @@
 					""
 				]
 			}
-		}
-	],
-	"variable": [
-		{
-			"key": "userIndex",
-			"value": "0",
-			"type": "string"
-		},
-		{
-			"key": "userId",
-			"value": ""
-		},
-		{
-			"key": "email",
-			"value": ""
-		},
-		{
-			"key": "username",
-			"value": ""
-		},
-		{
-			"key": "passwordHash",
-			"value": ""
 		}
 	]
 }
