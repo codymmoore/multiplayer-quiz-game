@@ -1,18 +1,36 @@
 services:
-  postgres:
+  postgres-user:
     image: postgres:17
-    container_name: postgres
+    container_name: postgres-user
     restart: unless-stopped
     environment:
-      POSTGRES_USER: quizchief-admin
-      POSTGRES_PASSWORD: quizchief-admin
-      POSTGRES_DB: quizchief_local
+      POSTGRES_USER: quizchief-user-admin
+      POSTGRES_PASSWORD: userpassword
+      POSTGRES_DB: quizchief_user
     ports:
       - "5432:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - user_pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U quizchief-admin -d quizchief_local"]
+      test: ["CMD-SHELL", "pg_isready -U quizchief-user-admin -d quizchief_user"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  postgres-auth:
+    image: postgres:17
+    container_name: postgres-auth
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: quizchief-auth-admin
+      POSTGRES_PASSWORD: authpassword
+      POSTGRES_DB: quizchief_auth
+    ports:
+      - "5433:5432"
+    volumes:
+      - auth_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quizchief-auth-admin -d quizchief_auth"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -23,13 +41,28 @@ services:
     volumes:
       - .:/app
     depends_on:
-      - postgres
+      - postgres-user
     environment:
-      DATABASE_URL: postgres://quizchief-admin:quizchief-admin@postgres:5432/quizchief_local?sslmode=disable
+      DATABASE_URL: postgres://quizchief-user-admin:userpassword@postgres-user:5432/quizchief_user?sslmode=disable
     entrypoint: >
       /bin/sh -c "
         go install github.com/pressly/goose/v3/cmd/goose@latest &&
-        goose -dir internal/user/db/migrations postgres \"postgres://quizchief-admin:quizchief-admin@postgres:5432/quizchief_local?sslmode=disable\" up
+        goose -dir internal/user/db/migrations postgres \"postgres://quizchief-user-admin:userpassword@postgres-user:5432/quizchief_user?sslmode=disable\" up
+      "
+
+  migrate-auth:
+    image: golang:1.24
+    working_dir: /app
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres-auth
+    environment:
+      DATABASE_URL: postgres://quizchief-auth-admin:authpassword@postgres-auth:5432/quizchief_auth?sslmode=disable
+    entrypoint: >
+      /bin/sh -c "
+        go install github.com/pressly/goose/v3/cmd/goose@latest &&
+        goose -dir internal/auth/db/migrations postgres \"postgres://quizchief-auth-admin:authpassword@postgres-auth:5432/quizchief_auth?sslmode=disable\" up
       "
 
   user-service:
@@ -42,13 +75,13 @@ services:
         DEBUG_PORT: ${DEBUG_PORT:-2345}
     container_name: user-service
     depends_on:
-      postgres:
+      postgres-user:
         condition: service_healthy
       migrate-user:
         condition: service_completed_successfully
     environment:
-      DATABASE_URL: postgres://quizchief-admin:quizchief-admin@postgres:5432/quizchief_local?sslmode=disable
-      JWT_SECRET: quizchief_jwt_secret_local
+      DATABASE_URL: postgres://quizchief-user-admin:userpassword@postgres-user:5432/quizchief_user?sslmode=disable
+      JWT_SECRET: quizchief_jwt_secret
       DATABASE_DRIVER: postgres
       PORT: 8080
       BASE_URL: http://localhost:8080
@@ -56,5 +89,33 @@ services:
       - "8080:8080"
       - "${DEBUG_PORT:-2345}:${DEBUG_PORT:-2345}"
 
+  auth-service:
+    build:
+      context: .
+      dockerfile: internal/auth/Dockerfile
+      target: ${TARGET:-release}
+      args:
+        DEBUG: ${DEBUG:-false}
+        DEBUG_PORT: ${DEBUG_PORT:-2346}
+    container_name: auth-service
+    depends_on:
+      postgres-auth:
+        condition: service_healthy
+      migrate-auth:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://quizchief-auth-admin:authpassword@postgres-auth:5432/quizchief_auth?sslmode=disable
+      JWT_SECRET: quizchief_jwt_secret
+      DATABASE_DRIVER: postgres
+      PORT: 8081
+      BASE_URL: http://localhost:8081
+      USER_SERVICE_URL: http://user-service:8080
+      POSTMARK_SERVER_TOKEN: "<postmark_server_token>"
+      POSTMARK_ACCOUNT_TOKEN: "<postmark_account_token>"
+    ports:
+      - "8081:8081"
+      - "${DEBUG_PORT:-2346}:${DEBUG_PORT:-2346}"
+
 volumes:
-  pgdata:
+  user_pgdata:
+  auth_pgdata:
