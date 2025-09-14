@@ -4,7 +4,7 @@ import (
 	db "auth/db/generated"
 	"common"
 	api "common/api/auth"
-	"common/api/user"
+	"common/user"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"

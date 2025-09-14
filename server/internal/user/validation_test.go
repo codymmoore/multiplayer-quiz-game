@@ -1,8 +1,8 @@
 package user
 
 import (
-	api "common/api/user"
 	"common/test"
+	api "common/user"
 	"context"
 	"net/http"
 	"testing"

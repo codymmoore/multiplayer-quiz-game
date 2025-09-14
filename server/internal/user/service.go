@@ -3,7 +3,7 @@ package user
 
 import (
 	"common"
-	api "common/api/user"
+	api "common/user"
 	"context"
 	"database/sql"
 	"errors"

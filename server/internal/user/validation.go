@@ -1,8 +1,8 @@
 package user
 
 import (
-	api "common/api/user"
 	"common/errors"
+	api "common/user"
 	"common/validate"
 	"context"
 	"net/http"

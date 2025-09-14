@@ -2,8 +2,8 @@ package user
 
 import (
 	"common"
-	api "common/api/user"
 	"common/test"
+	api "common/user"
 	"context"
 	"errors"
 	"fmt"

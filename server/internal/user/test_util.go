@@ -1,7 +1,7 @@
 package user
 
 import (
-	api "common/api/user"
+	api "common/user"
 	"context"
 )
 

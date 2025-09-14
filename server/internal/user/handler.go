@@ -2,8 +2,8 @@ package user
 
 import (
 	"common"
-	api "common/api/user"
 	"common/errors"
+	api "common/user"
 	"encoding/json"
 	"github.com/go-chi/chi/v5"
 	"net/http"

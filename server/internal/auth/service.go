@@ -4,8 +4,8 @@ import (
 	db "auth/db/generated"
 	"common"
 	api "common/api/auth"
-	"common/api/user"
 	"common/errors"
+	"common/user"
 	"context"
 	"crypto/rand"
 	"database/sql"
@@ -18,7 +18,6 @@ import (
 )
 
 // Service Interface for performing authentication operations
-// TODO endpoint for client JWT?
 type Service interface {
 	Login(ctx context.Context, request *api.LoginRequest) (*api.LoginResponse, error)
 	Logout(ctx context.Context, request *api.LogoutRequest) (*api.LogoutResponse, error)

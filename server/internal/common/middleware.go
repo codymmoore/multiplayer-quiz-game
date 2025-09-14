@@ -1,7 +1,7 @@
 package common
 
 import (
-	"common/api/user"
+	"common/user"
 	"context"
 	"fmt"
 	"github.com/go-chi/jwtauth/v5"
