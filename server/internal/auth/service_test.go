@@ -598,7 +598,7 @@ func TestService_SendVerificationEmail_SendEmailError(t *testing.T) {
 	email := test.ValidEmail
 
 	ctx, request := sendVerificationEmailSetup(t, userId, email)
-	postmarkClient.HTTPClient = mock.GetMockErrorHttpClient()
+	postmarkClient.HTTPClient = mock.NewErrorHttpClient()
 
 	response, err := service.SendVerificationEmail(ctx, request)
 
@@ -834,7 +834,7 @@ func sendVerificationEmailSetup(t *testing.T, userId int, email string) (
 		return db.VerificationCode{}, nil
 	}
 
-	postmarkClient.HTTPClient = mock.GetMockHttpClient(http.StatusOK, "{}")
+	postmarkClient.HTTPClient = mock.NewHttpClient(http.StatusOK, "{}")
 
 	ctx := context.WithValue(context.Background(), common.JWTCtxKey, JWT)
 	request := &api.SendVerificationEmailRequest{Email: email}

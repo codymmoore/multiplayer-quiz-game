@@ -7,10 +7,10 @@ import (
 	"net/http"
 )
 
-// GetMockHttpClient gets http.Client that returns the specified status code and response body
-func GetMockHttpClient(statusCode int, responseBody string) *http.Client {
+// NewHttpClient creates http.Client that returns the specified status code and response body
+func NewHttpClient(statusCode int, responseBody string) *http.Client {
 	return &http.Client{
-		Transport: &MockRoundTripper{
+		Transport: &RoundTripper{
 			RoundTripFunc: func(req *http.Request) (*http.Response, error) {
 				return &http.Response{
 					StatusCode: statusCode,
@@ -24,10 +24,10 @@ func GetMockHttpClient(statusCode int, responseBody string) *http.Client {
 	}
 }
 
-// GetMockErrorHttpClient gets http.Client that returns an error
-func GetMockErrorHttpClient() *http.Client {
+// NewErrorHttpClient creates http.Client that returns an error
+func NewErrorHttpClient() *http.Client {
 	return &http.Client{
-		Transport: &MockRoundTripper{
+		Transport: &RoundTripper{
 			RoundTripFunc: func(req *http.Request) (*http.Response, error) {
 				return nil, errors.New("")
 			},
@@ -35,11 +35,11 @@ func GetMockErrorHttpClient() *http.Client {
 	}
 }
 
-// MockRoundTripper RoundTripper implementation used for mocking http.Client
-type MockRoundTripper struct {
+// RoundTripper implementation used for mocking http.Client
+type RoundTripper struct {
 	RoundTripFunc func(req *http.Request) (*http.Response, error)
 }
 
-func (m *MockRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+func (m *RoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
 	return m.RoundTripFunc(req)
 }
