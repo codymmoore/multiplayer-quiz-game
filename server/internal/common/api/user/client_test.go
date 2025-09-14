@@ -34,7 +34,7 @@ func TestClient_CreateUser_Success(t *testing.T) {
 		Email:    test.ValidEmail,
 		Password: test.ValidPassword,
 	}
-	response, err := client.CreateUser(request, jwtString)
+	response, err := client.CreateUser(request)
 	if err != nil {
 		t.Errorf(`client.CreateUser(request, jwtString) error = "%v", expected "<nil>"`, err)
 	}
@@ -56,7 +56,7 @@ func TestClient_CreateUser_NilRequest(t *testing.T) {
 		HttpClient: test.GetMockHttpClient(http.StatusCreated, string(responseBody)),
 	}
 
-	response, err := client.CreateUser(nil, jwtString)
+	response, err := client.CreateUser(nil)
 	if err == nil {
 		t.Error(`client.CreateUser(request, jwtString) error = "<nil>", expected non-nil`)
 	}
@@ -83,7 +83,7 @@ func TestClient_CreateUser_InvalidBaseUrl(t *testing.T) {
 		Email:    test.ValidEmail,
 		Password: test.ValidPassword,
 	}
-	response, err := client.CreateUser(request, jwtString)
+	response, err := client.CreateUser(request)
 	if err == nil {
 		t.Error(`client.CreateUser(request, jwtString) error = "<nil>", expected non-nil`)
 	}
@@ -103,7 +103,7 @@ func TestClient_CreateUser_HttpClientError(t *testing.T) {
 		Email:    test.ValidEmail,
 		Password: test.ValidPassword,
 	}
-	response, err := client.CreateUser(request, jwtString)
+	response, err := client.CreateUser(request)
 	if err == nil {
 		t.Error(`client.CreateUser(request, jwtString) error = "<nil>", expected non-nil`)
 	}
@@ -130,7 +130,7 @@ func TestClient_CreateUser_BadStatusCode(t *testing.T) {
 		Email:    test.ValidEmail,
 		Password: test.ValidPassword,
 	}
-	response, err := client.CreateUser(request, jwtString)
+	response, err := client.CreateUser(request)
 	if err == nil {
 		t.Error(`client.CreateUser(request, jwtString) error = "<nil>", expected non-nil`)
 	}
@@ -150,7 +150,7 @@ func TestClient_CreateUser_BadResponseBody(t *testing.T) {
 		Email:    test.ValidEmail,
 		Password: test.ValidPassword,
 	}
-	response, err := client.CreateUser(request, jwtString)
+	response, err := client.CreateUser(request)
 	if err == nil {
 		t.Error(`client.CreateUser(request, jwtString) error = "<nil>", expected non-nil`)
 	}
@@ -186,7 +186,7 @@ func TestClient_GetUser_Success(t *testing.T) {
 		Username: &username,
 		Email:    &email,
 	}
-	response, err := client.GetUser(request, jwtString)
+	response, err := client.GetUser(request)
 	if err != nil {
 		t.Errorf(`client.GetUser(request, jwtString) error = "%v", expected "<nil>"`, err)
 	}
@@ -217,7 +217,7 @@ func TestClient_GetUser_NilRequest(t *testing.T) {
 		HttpClient: test.GetMockHttpClient(http.StatusOK, string(responseBody)),
 	}
 
-	response, err := client.GetUser(nil, jwtString)
+	response, err := client.GetUser(nil)
 	if err == nil {
 		t.Error(`client.GetUser(nil, jwtString) error = "<nil>", expected non-nil`)
 	}
@@ -248,7 +248,7 @@ func TestClient_GetUser_QueryStringFailure(t *testing.T) {
 		HttpClient: test.GetMockHttpClient(http.StatusOK, string(responseBody)),
 	}
 
-	response, err := client.GetUser(&GetUserRequest{}, jwtString)
+	response, err := client.GetUser(&GetUserRequest{})
 	if err == nil {
 		t.Error(`client.GetUser(request, jwtString) error = "<nil>", expected non-nil`)
 	}
@@ -284,7 +284,7 @@ func TestClient_GetUser_InvalidBaseUrl(t *testing.T) {
 		Username: &username,
 		Email:    &email,
 	}
-	response, err := client.GetUser(request, jwtString)
+	response, err := client.GetUser(request)
 	if err == nil {
 		t.Error(`client.GetUser(request, jwtString) error = "<nil>", expected non-nil`)
 	}
@@ -307,7 +307,7 @@ func TestClient_GetUser_HttpClientError(t *testing.T) {
 		Username: &username,
 		Email:    &email,
 	}
-	response, err := client.GetUser(request, jwtString)
+	response, err := client.GetUser(request)
 	if err == nil {
 		t.Error(`client.GetUser(request, jwtString) error = "<nil>", expected non-nil`)
 	}
@@ -343,7 +343,7 @@ func TestClient_GetUser_BadStatusCode(t *testing.T) {
 		Username: &username,
 		Email:    &email,
 	}
-	response, err := client.GetUser(request, jwtString)
+	response, err := client.GetUser(request)
 	if err == nil {
 		t.Error(`client.GetUser(request, jwtString) error = "<nil>", expected non-nil`)
 	}
@@ -366,7 +366,7 @@ func TestClient_GetUser_BadResponseBody(t *testing.T) {
 		Username: &username,
 		Email:    &email,
 	}
-	response, err := client.GetUser(request, jwtString)
+	response, err := client.GetUser(request)
 	if err == nil {
 		t.Error(`client.GetUser(request, jwtString) error = "<nil>", expected non-nil`)
 	}
@@ -415,7 +415,7 @@ func TestClient_GetUsers_Success(t *testing.T) {
 		SortField:     &sortField,
 		SortDirection: &sortDirection,
 	}
-	response, err := client.GetUsers(request, jwtString)
+	response, err := client.GetUsers(request)
 	if err != nil {
 		t.Errorf(`client.GetUsers(request, jwtString) error = "%v", expected "<nil>"`, err)
 	}
@@ -464,7 +464,7 @@ func TestClient_GetUsers_NilRequest(t *testing.T) {
 		HttpClient: test.GetMockHttpClient(http.StatusOK, string(responseBody)),
 	}
 
-	response, err := client.GetUsers(nil, jwtString)
+	response, err := client.GetUsers(nil)
 	if err == nil {
 		t.Error(`client.GetUsers(nil, jwtString) error = "<nil>", expected non-nil`)
 	}
@@ -513,7 +513,7 @@ func TestClient_GetUsers_InvalidBaseUrl(t *testing.T) {
 		SortField:     &sortField,
 		SortDirection: &sortDirection,
 	}
-	response, err := client.GetUsers(request, jwtString)
+	response, err := client.GetUsers(request)
 	if err == nil {
 		t.Error(`client.GetUsers(request, jwtString) error = "<nil>", expected non-nil`)
 	}
@@ -538,7 +538,7 @@ func TestClient_GetUsers_HttpClientError(t *testing.T) {
 		SortField:     &sortField,
 		SortDirection: &sortDirection,
 	}
-	response, err := client.GetUsers(request, jwtString)
+	response, err := client.GetUsers(request)
 	if err == nil {
 		t.Error(`client.GetUsers(request, jwtString) error = "<nil>", expected non-nil`)
 	}
@@ -587,7 +587,7 @@ func TestClient_GetUsers_BadStatusCode(t *testing.T) {
 		SortField:     &sortField,
 		SortDirection: &sortDirection,
 	}
-	response, err := client.GetUsers(request, jwtString)
+	response, err := client.GetUsers(request)
 	if err == nil {
 		t.Error(`client.GetUsers(request, jwtString) error = "<nil>", expected non-nil`)
 	}
@@ -612,7 +612,7 @@ func TestClient_GetUsers_BadResponseBody(t *testing.T) {
 		SortField:     &sortField,
 		SortDirection: &sortDirection,
 	}
-	response, err := client.GetUsers(request, jwtString)
+	response, err := client.GetUsers(request)
 	if err == nil {
 		t.Error(`client.GetUsers(request, jwtString) error = "<nil>", expected non-nil`)
 	}

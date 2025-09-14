@@ -41,15 +41,7 @@ type ServiceImpl struct {
 // Login provides JWT for a user
 func (s *ServiceImpl) Login(ctx context.Context, request *api.LoginRequest) (*api.LoginResponse, error) {
 	getUserRequest := &user.GetUserRequest{Username: &request.Username}
-	jwtStr, err := common.JWTFromContext(ctx)
-	if err != nil {
-		return nil, &errors.HTTP{
-			StatusCode: http.StatusUnauthorized,
-			Message:    fmt.Sprintf("unable to retrieve JWT from context: %v", err),
-		}
-	}
-
-	usr, err := s.UserClient.GetUser(getUserRequest, jwtStr)
+	usr, err := s.UserClient.GetUser(getUserRequest)
 	if err != nil {
 		var httpErr *errors.HTTP
 		if stderrors.As(err, &httpErr) && httpErr.StatusCode == http.StatusNotFound {
@@ -236,15 +228,7 @@ func (s *ServiceImpl) SendVerificationEmail(
 	request *api.SendVerificationEmailRequest,
 ) (*api.SendVerificationEmailResponse, error) {
 	getUserRequest := &user.GetUserRequest{Email: &request.Email}
-	jwtStr, err := common.JWTFromContext(ctx)
-	if err != nil {
-		return nil, &errors.HTTP{
-			StatusCode: http.StatusUnauthorized,
-			Message:    fmt.Sprintf("unable to retrieve JWT from context: %v", err),
-		}
-	}
-
-	usr, err := s.UserClient.GetUser(getUserRequest, jwtStr)
+	usr, err := s.UserClient.GetUser(getUserRequest)
 	if err != nil {
 		var httpErr *errors.HTTP
 		if stderrors.As(err, &httpErr) && httpErr.StatusCode == http.StatusNotFound {

@@ -10,7 +10,6 @@ import (
 	_ "github.com/lib/pq" // registers "postgres" driver
 	"net/http"
 	"os"
-	"strings"
 )
 
 // InitJWT Initialize the global JWTAuth instance using the JWT_SECRET environment variable
@@ -70,14 +69,6 @@ func GetRouteUrl(context context.Context) (string, error) {
 func GetRoutePattern(context context.Context) string {
 	routeContext := chi.RouteContext(context)
 	return routeContext.RoutePattern()
-}
-
-// GetJWT Gets the JWT string from the request header
-func GetJWT(r *http.Request) string { // use jwtauth.TokenFromHeader()
-	authHeader := r.Header.Get("Authorization")
-	tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-	tokenString = strings.TrimSpace(tokenString)
-	return tokenString
 }
 
 // JWTFromContext gets the raw JWT string from the specified Context

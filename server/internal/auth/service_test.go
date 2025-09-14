@@ -75,25 +75,6 @@ func TestService_Login_Success(t *testing.T) {
 	}
 }
 
-func TestService_Login_JWTMissingFromContext(t *testing.T) {
-	userId := 1
-	username := test.ValidUsername
-	email := test.ValidEmail
-	password := test.ValidPassword
-
-	_, request := loginSetup(t, userId, username, email, password)
-	response, err := service.Login(context.Background(), request)
-
-	if err == nil {
-		t.Error(`service.Login(ctx, request) error = "<nil>", expected non-nil`)
-	}
-	test.AssertHTTPError(t, err, http.StatusUnauthorized)
-
-	if response != nil {
-		t.Errorf(`service.Login(ctx, request) response = "%v", expected nil`, response)
-	}
-}
-
 func TestService_Login_MissingUser(t *testing.T) {
 	userId := 1
 	username := test.ValidUsername
@@ -101,7 +82,7 @@ func TestService_Login_MissingUser(t *testing.T) {
 	password := test.ValidPassword
 
 	ctx, request := loginSetup(t, userId, username, email, password)
-	userClient.GetUserFunc = func(request *user.GetUserRequest, jwt string) (*user.GetUserResponse, error) {
+	userClient.GetUserFunc = func(request *user.GetUserRequest) (*user.GetUserResponse, error) {
 		return nil, &errors.HTTP{StatusCode: http.StatusNotFound, Message: "Not Found"}
 	}
 
@@ -124,7 +105,7 @@ func TestService_Login_GetUserError(t *testing.T) {
 	password := test.ValidPassword
 
 	ctx, request := loginSetup(t, userId, username, email, password)
-	userClient.GetUserFunc = func(request *user.GetUserRequest, jwt string) (*user.GetUserResponse, error) {
+	userClient.GetUserFunc = func(request *user.GetUserRequest) (*user.GetUserResponse, error) {
 		return nil, &errors.HTTP{StatusCode: http.StatusInternalServerError, Message: "Error"}
 	}
 
@@ -148,7 +129,7 @@ func TestService_Login_UnverifiedUser(t *testing.T) {
 
 	ctx, request := loginSetup(t, userId, username, email, password)
 	passwordHash, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	userClient.GetUserFunc = func(request *user.GetUserRequest, jwt string) (*user.GetUserResponse, error) {
+	userClient.GetUserFunc = func(request *user.GetUserRequest) (*user.GetUserResponse, error) {
 		return &user.GetUserResponse{
 			UserId:       userId,
 			Username:     username,
@@ -178,7 +159,7 @@ func TestService_Login_IncorrectPassword(t *testing.T) {
 
 	ctx, request := loginSetup(t, userId, username, email, password)
 
-	userClient.GetUserFunc = func(request *user.GetUserRequest, jwt string) (*user.GetUserResponse, error) {
+	userClient.GetUserFunc = func(request *user.GetUserRequest) (*user.GetUserResponse, error) {
 		return &user.GetUserResponse{
 			UserId:       userId,
 			Username:     username,
@@ -545,29 +526,12 @@ func TestService_SendVerificationEmail_Success(t *testing.T) {
 	}
 }
 
-func TestService_SendVerificationEmail_JWTMissingFromContext(t *testing.T) {
-	userId := 1
-	email := test.ValidEmail
-
-	_, request := sendVerificationEmailSetup(t, userId, email)
-	response, err := service.SendVerificationEmail(context.Background(), request)
-
-	if err == nil {
-		t.Error(`service.SendVerificationEmail(ctx, request) error = "<nil>", expected non-nil`)
-	}
-	test.AssertHTTPError(t, err, http.StatusUnauthorized)
-
-	if response != nil {
-		t.Errorf(`service.SendVerificationEmail(ctx, request) response = "%v", expected "<nil>"`, response)
-	}
-}
-
 func TestService_SendVerificationEmail_MissingUser(t *testing.T) {
 	userId := 1
 	email := test.ValidEmail
 
 	ctx, request := sendVerificationEmailSetup(t, userId, email)
-	userClient.GetUserFunc = func(request *user.GetUserRequest, jwt string) (*user.GetUserResponse, error) {
+	userClient.GetUserFunc = func(request *user.GetUserRequest) (*user.GetUserResponse, error) {
 		return nil, &errors.HTTP{StatusCode: http.StatusNotFound, Message: ""}
 	}
 
@@ -588,7 +552,7 @@ func TestService_SendVerificationEmail_GetUserError(t *testing.T) {
 	email := test.ValidEmail
 
 	ctx, request := sendVerificationEmailSetup(t, userId, email)
-	userClient.GetUserFunc = func(request *user.GetUserRequest, jwt string) (*user.GetUserResponse, error) {
+	userClient.GetUserFunc = func(request *user.GetUserRequest) (*user.GetUserResponse, error) {
 		return nil, stderrors.New("")
 	}
 
@@ -753,7 +717,7 @@ func loginSetup(t *testing.T, userId int, username string, email string, passwor
 ) {
 	passwordHash, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
-	userClient.GetUserFunc = func(request *user.GetUserRequest, jwt string) (*user.GetUserResponse, error) {
+	userClient.GetUserFunc = func(request *user.GetUserRequest) (*user.GetUserResponse, error) {
 		if *request.Username != username {
 			t.Errorf(`request.Username = "%v", expected "%v"`, *request.Username, username)
 		}
@@ -852,7 +816,7 @@ func sendVerificationEmailSetup(t *testing.T, userId int, email string) (
 	context.Context,
 	*api.SendVerificationEmailRequest,
 ) {
-	userClient.GetUserFunc = func(request *user.GetUserRequest, jwt string) (*user.GetUserResponse, error) {
+	userClient.GetUserFunc = func(request *user.GetUserRequest) (*user.GetUserResponse, error) {
 		return &user.GetUserResponse{
 			UserId: 1,
 			Email:  email,

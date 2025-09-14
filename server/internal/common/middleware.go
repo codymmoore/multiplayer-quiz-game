@@ -58,7 +58,7 @@ func AuthMiddleware() func(http.Handler) http.Handler {
 					Username: &claims.Username,
 					Email:    &claims.Email,
 				}
-				if _, err := userClient.GetUser(getUserRequest, GetJWT(r)); err != nil {
+				if _, err := userClient.GetUser(getUserRequest); err != nil {
 					http.Error(w, fmt.Sprintf("unable to get user: %v", err), http.StatusInternalServerError)
 					return
 				}

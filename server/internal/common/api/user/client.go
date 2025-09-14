@@ -13,9 +13,9 @@ import (
 
 // Client Interface for user service client
 type Client interface {
-	CreateUser(request *CreateUserRequest, jwt string) (*CreateUserResponse, error)
-	GetUser(request *GetUserRequest, jwt string) (*GetUserResponse, error)
-	GetUsers(request *GetUsersRequest, jwt string) (*GetUsersResponse, error)
+	CreateUser(request *CreateUserRequest) (*CreateUserResponse, error)
+	GetUser(request *GetUserRequest) (*GetUserResponse, error)
+	GetUsers(request *GetUsersRequest) (*GetUsersResponse, error)
 	UpdateUser(request *UpdateUserRequest, jwt string) (*UpdateUserResponse, error)
 	DeleteUser(request *DeleteUserRequest, jwt string) (*DeleteUserResponse, error)
 	VerifyUser(request *VerifyUserRequest, jwt string) (*VerifyUserResponse, error)
@@ -28,7 +28,7 @@ type ClientImpl struct {
 }
 
 // CreateUser Create a new user
-func (client *ClientImpl) CreateUser(request *CreateUserRequest, jwt string) (*CreateUserResponse, error) {
+func (client *ClientImpl) CreateUser(request *CreateUserRequest) (*CreateUserResponse, error) {
 	if request == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
@@ -43,7 +43,6 @@ func (client *ClientImpl) CreateUser(request *CreateUserRequest, jwt string) (*C
 	if err != nil {
 		return nil, fmt.Errorf("failed to create HTTP request: %w", err)
 	}
-	httpRequest.Header.Set("Authorization", "Bearer "+jwt)
 	httpRequest.Header.Set("Content-Type", "application/json")
 
 	httpResponse, err := client.HttpClient.Do(httpRequest)
@@ -68,7 +67,7 @@ func (client *ClientImpl) CreateUser(request *CreateUserRequest, jwt string) (*C
 }
 
 // GetUser Retrieve a user by ID, username, and/or email
-func (client *ClientImpl) GetUser(request *GetUserRequest, jwt string) (*GetUserResponse, error) {
+func (client *ClientImpl) GetUser(request *GetUserRequest) (*GetUserResponse, error) {
 	if request == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
@@ -83,7 +82,6 @@ func (client *ClientImpl) GetUser(request *GetUserRequest, jwt string) (*GetUser
 	if err != nil {
 		return nil, fmt.Errorf("failed to create HTTP request: %w", err)
 	}
-	httpRequest.Header.Set("Authorization", "Bearer "+jwt)
 	httpRequest.Header.Set("Content-Type", "application/json")
 
 	httpResponse, err := client.HttpClient.Do(httpRequest)
@@ -108,7 +106,7 @@ func (client *ClientImpl) GetUser(request *GetUserRequest, jwt string) (*GetUser
 }
 
 // GetUsers Retrieve all users (paginated)
-func (client *ClientImpl) GetUsers(request *GetUsersRequest, jwt string) (*GetUsersResponse, error) {
+func (client *ClientImpl) GetUsers(request *GetUsersRequest) (*GetUsersResponse, error) {
 	if request == nil {
 		return nil, fmt.Errorf("request cannot be nil")
 	}
@@ -127,7 +125,6 @@ func (client *ClientImpl) GetUsers(request *GetUsersRequest, jwt string) (*GetUs
 	if err != nil {
 		return nil, fmt.Errorf("failed to create HTTP request: %w", err)
 	}
-	httpRequest.Header.Set("Authorization", "Bearer "+jwt)
 	httpRequest.Header.Set("Content-Type", "application/json")
 
 	httpResponse, err := client.HttpClient.Do(httpRequest)
