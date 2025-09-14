@@ -1,6 +1,7 @@
 package user
 
 import (
+	"common/mock"
 	"common/test"
 	"encoding/json"
 	"fmt"
@@ -26,7 +27,7 @@ func TestClient_CreateUser_Success(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusCreated, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusCreated, string(responseBody)),
 	}
 
 	request := &CreateUserRequest{
@@ -53,7 +54,7 @@ func TestClient_CreateUser_NilRequest(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusCreated, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusCreated, string(responseBody)),
 	}
 
 	response, err := client.CreateUser(nil)
@@ -75,7 +76,7 @@ func TestClient_CreateUser_InvalidBaseUrl(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    ":",
-		HttpClient: test.GetMockHttpClient(http.StatusCreated, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusCreated, string(responseBody)),
 	}
 
 	request := &CreateUserRequest{
@@ -95,7 +96,7 @@ func TestClient_CreateUser_InvalidBaseUrl(t *testing.T) {
 func TestClient_CreateUser_HttpClientError(t *testing.T) {
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockErrorHttpClient(),
+		HttpClient: mock.GetMockErrorHttpClient(),
 	}
 
 	request := &CreateUserRequest{
@@ -122,7 +123,7 @@ func TestClient_CreateUser_BadStatusCode(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusBadRequest, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusBadRequest, string(responseBody)),
 	}
 
 	request := &CreateUserRequest{
@@ -142,7 +143,7 @@ func TestClient_CreateUser_BadStatusCode(t *testing.T) {
 func TestClient_CreateUser_BadResponseBody(t *testing.T) {
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusCreated, "badResponseBody"),
+		HttpClient: mock.GetMockHttpClient(http.StatusCreated, "badResponseBody"),
 	}
 
 	request := &CreateUserRequest{
@@ -178,7 +179,7 @@ func TestClient_GetUser_Success(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusOK, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusOK, string(responseBody)),
 	}
 
 	request := &GetUserRequest{
@@ -214,7 +215,7 @@ func TestClient_GetUser_NilRequest(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusOK, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusOK, string(responseBody)),
 	}
 
 	response, err := client.GetUser(nil)
@@ -245,7 +246,7 @@ func TestClient_GetUser_QueryStringFailure(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusOK, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusOK, string(responseBody)),
 	}
 
 	response, err := client.GetUser(&GetUserRequest{})
@@ -276,7 +277,7 @@ func TestClient_GetUser_InvalidBaseUrl(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    ":",
-		HttpClient: test.GetMockHttpClient(http.StatusOK, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusOK, string(responseBody)),
 	}
 
 	request := &GetUserRequest{
@@ -299,7 +300,7 @@ func TestClient_GetUser_HttpClientError(t *testing.T) {
 	email := test.ValidEmail
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockErrorHttpClient(),
+		HttpClient: mock.GetMockErrorHttpClient(),
 	}
 
 	request := &GetUserRequest{
@@ -335,7 +336,7 @@ func TestClient_GetUser_BadStatusCode(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusBadRequest, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusBadRequest, string(responseBody)),
 	}
 
 	request := &GetUserRequest{
@@ -358,7 +359,7 @@ func TestClient_GetUser_BadResponseBody(t *testing.T) {
 	email := test.ValidEmail
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusOK, "badResponseBody"),
+		HttpClient: mock.GetMockHttpClient(http.StatusOK, "badResponseBody"),
 	}
 
 	request := &GetUserRequest{
@@ -402,7 +403,7 @@ func TestClient_GetUsers_Success(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusOK, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusOK, string(responseBody)),
 	}
 
 	limit := 1
@@ -461,7 +462,7 @@ func TestClient_GetUsers_NilRequest(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusOK, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusOK, string(responseBody)),
 	}
 
 	response, err := client.GetUsers(nil)
@@ -500,7 +501,7 @@ func TestClient_GetUsers_InvalidBaseUrl(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    ":",
-		HttpClient: test.GetMockHttpClient(http.StatusOK, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusOK, string(responseBody)),
 	}
 
 	limit := 1
@@ -525,7 +526,7 @@ func TestClient_GetUsers_InvalidBaseUrl(t *testing.T) {
 func TestClient_GetUsers_HttpClientError(t *testing.T) {
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockErrorHttpClient(),
+		HttpClient: mock.GetMockErrorHttpClient(),
 	}
 
 	limit := 1
@@ -574,7 +575,7 @@ func TestClient_GetUsers_BadStatusCode(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusBadRequest, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusBadRequest, string(responseBody)),
 	}
 
 	limit := 1
@@ -599,7 +600,7 @@ func TestClient_GetUsers_BadStatusCode(t *testing.T) {
 func TestClient_GetUsers_BadResponseBody(t *testing.T) {
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusOK, "badResponseBody"),
+		HttpClient: mock.GetMockHttpClient(http.StatusOK, "badResponseBody"),
 	}
 
 	limit := 1
@@ -641,7 +642,7 @@ func TestClient_UpdateUser_Success(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusOK, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusOK, string(responseBody)),
 	}
 
 	request := &UpdateUserRequest{
@@ -679,7 +680,7 @@ func TestClient_UpdateUser_NilRequest(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusOK, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusOK, string(responseBody)),
 	}
 
 	response, err := client.UpdateUser(nil, jwtString)
@@ -711,7 +712,7 @@ func TestClient_UpdateUser_InvalidBaseUrl(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    ":",
-		HttpClient: test.GetMockHttpClient(http.StatusOK, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusOK, string(responseBody)),
 	}
 
 	request := &UpdateUserRequest{
@@ -736,7 +737,7 @@ func TestClient_UpdateUser_HttpClientError(t *testing.T) {
 	password := test.ValidPassword
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockErrorHttpClient(),
+		HttpClient: mock.GetMockErrorHttpClient(),
 	}
 
 	request := &UpdateUserRequest{
@@ -774,7 +775,7 @@ func TestClient_UpdateUser_BadStatusCode(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusBadRequest, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusBadRequest, string(responseBody)),
 	}
 
 	request := &UpdateUserRequest{
@@ -799,7 +800,7 @@ func TestClient_UpdateUser_BadResponseBody(t *testing.T) {
 	password := test.ValidPassword
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusOK, "badResponseBody"),
+		HttpClient: mock.GetMockHttpClient(http.StatusOK, "badResponseBody"),
 	}
 
 	request := &UpdateUserRequest{
@@ -826,7 +827,7 @@ func TestClient_DeleteUser_Success(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusNoContent, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusNoContent, string(responseBody)),
 	}
 
 	request := &DeleteUserRequest{
@@ -849,7 +850,7 @@ func TestClient_DeleteUser_NilRequest(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusNoContent, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusNoContent, string(responseBody)),
 	}
 
 	response, err := client.DeleteUser(nil, jwtString)
@@ -870,7 +871,7 @@ func TestClient_DeleteUser_InvalidBaseUrl(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    ":",
-		HttpClient: test.GetMockHttpClient(http.StatusNoContent, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusNoContent, string(responseBody)),
 	}
 
 	request := &DeleteUserRequest{
@@ -889,7 +890,7 @@ func TestClient_DeleteUser_HttpClientError(t *testing.T) {
 	userId := 1
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockErrorHttpClient(),
+		HttpClient: mock.GetMockErrorHttpClient(),
 	}
 
 	request := &DeleteUserRequest{
@@ -913,7 +914,7 @@ func TestClient_DeleteUser_BadStatusCode(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusBadRequest, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusBadRequest, string(responseBody)),
 	}
 
 	request := &DeleteUserRequest{
@@ -937,7 +938,7 @@ func TestClient_VerifyUser_Success(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusNoContent, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusNoContent, string(responseBody)),
 	}
 
 	request := &VerifyUserRequest{
@@ -960,7 +961,7 @@ func TestClient_VerifyUser_NilRequest(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusNoContent, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusNoContent, string(responseBody)),
 	}
 
 	response, err := client.VerifyUser(nil, jwtString)
@@ -981,7 +982,7 @@ func TestClient_VerifyUser_InvalidBaseUrl(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    ":",
-		HttpClient: test.GetMockHttpClient(http.StatusNoContent, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusNoContent, string(responseBody)),
 	}
 
 	request := &VerifyUserRequest{
@@ -1000,7 +1001,7 @@ func TestClient_VerifyUser_HttpClientError(t *testing.T) {
 	userId := 1
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockErrorHttpClient(),
+		HttpClient: mock.GetMockErrorHttpClient(),
 	}
 
 	request := &VerifyUserRequest{
@@ -1024,7 +1025,7 @@ func TestClient_VerifyUser_BadStatusCode(t *testing.T) {
 	}
 	client := ClientImpl{
 		BaseUrl:    mockUrl,
-		HttpClient: test.GetMockHttpClient(http.StatusBadRequest, string(responseBody)),
+		HttpClient: mock.GetMockHttpClient(http.StatusBadRequest, string(responseBody)),
 	}
 
 	request := &VerifyUserRequest{
