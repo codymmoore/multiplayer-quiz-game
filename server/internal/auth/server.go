@@ -3,7 +3,7 @@ package auth
 import (
 	db "auth/db/generated"
 	"common"
-	api "common/api/auth"
+	api "common/auth"
 	"common/user"
 	"fmt"
 	"github.com/go-chi/chi/v5"

@@ -1,7 +1,7 @@
 package auth
 
 import (
-	api "common/api/auth"
+	api "common/auth"
 	"common/errors"
 	"common/validate"
 	"net/http"

@@ -1,7 +1,7 @@
 package auth
 
 import (
-	api "common/api/auth"
+	api "common/auth"
 	"common/test"
 	"context"
 	"encoding/json"

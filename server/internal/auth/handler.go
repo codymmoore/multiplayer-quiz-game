@@ -2,7 +2,7 @@ package auth
 
 import (
 	"common"
-	api "common/api/auth"
+	api "common/auth"
 	"encoding/json"
 	"net/http"
 )
