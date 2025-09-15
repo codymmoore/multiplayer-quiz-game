@@ -1,13 +1,12 @@
-package user
+package user_test
 
 import (
 	"common/mock"
 	"common/test"
+	"common/user"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"slices"
-	"strings"
 	"testing"
 	"time"
 )
@@ -18,19 +17,19 @@ const (
 )
 
 func TestClient_CreateUser_Success(t *testing.T) {
-	mockResponse := &CreateUserResponse{
+	mockResponse := &user.CreateUserResponse{
 		UserId: 1,
 	}
 	responseBody, err := json.Marshal(mockResponse)
 	if err != nil {
 		t.Errorf("unable to marshal mock create user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusCreated, string(responseBody)),
 	}
 
-	request := &CreateUserRequest{
+	request := &user.CreateUserRequest{
 		Username: test.ValidUsername,
 		Email:    test.ValidEmail,
 		Password: test.ValidPassword,
@@ -45,14 +44,14 @@ func TestClient_CreateUser_Success(t *testing.T) {
 }
 
 func TestClient_CreateUser_NilRequest(t *testing.T) {
-	mockResponse := &CreateUserResponse{
+	mockResponse := &user.CreateUserResponse{
 		UserId: 1,
 	}
 	responseBody, err := json.Marshal(mockResponse)
 	if err != nil {
 		t.Errorf("unable to marshal mock create user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusCreated, string(responseBody)),
 	}
@@ -67,19 +66,19 @@ func TestClient_CreateUser_NilRequest(t *testing.T) {
 }
 
 func TestClient_CreateUser_InvalidBaseUrl(t *testing.T) {
-	mockResponse := &CreateUserResponse{
+	mockResponse := &user.CreateUserResponse{
 		UserId: 1,
 	}
 	responseBody, err := json.Marshal(mockResponse)
 	if err != nil {
 		t.Errorf("unable to marshal mock create user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    ":",
 		HttpClient: mock.NewHttpClient(http.StatusCreated, string(responseBody)),
 	}
 
-	request := &CreateUserRequest{
+	request := &user.CreateUserRequest{
 		Username: test.ValidUsername,
 		Email:    test.ValidEmail,
 		Password: test.ValidPassword,
@@ -94,12 +93,12 @@ func TestClient_CreateUser_InvalidBaseUrl(t *testing.T) {
 }
 
 func TestClient_CreateUser_HttpClientError(t *testing.T) {
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewErrorHttpClient(),
 	}
 
-	request := &CreateUserRequest{
+	request := &user.CreateUserRequest{
 		Username: test.ValidUsername,
 		Email:    test.ValidEmail,
 		Password: test.ValidPassword,
@@ -114,19 +113,19 @@ func TestClient_CreateUser_HttpClientError(t *testing.T) {
 }
 
 func TestClient_CreateUser_BadStatusCode(t *testing.T) {
-	mockResponse := &CreateUserResponse{
+	mockResponse := &user.CreateUserResponse{
 		UserId: 1,
 	}
 	responseBody, err := json.Marshal(mockResponse)
 	if err != nil {
 		t.Errorf("unable to marshal mock create user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusBadRequest, string(responseBody)),
 	}
 
-	request := &CreateUserRequest{
+	request := &user.CreateUserRequest{
 		Username: test.ValidUsername,
 		Email:    test.ValidEmail,
 		Password: test.ValidPassword,
@@ -141,12 +140,12 @@ func TestClient_CreateUser_BadStatusCode(t *testing.T) {
 }
 
 func TestClient_CreateUser_BadResponseBody(t *testing.T) {
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusCreated, "badResponseBody"),
 	}
 
-	request := &CreateUserRequest{
+	request := &user.CreateUserRequest{
 		Username: test.ValidUsername,
 		Email:    test.ValidEmail,
 		Password: test.ValidPassword,
@@ -164,7 +163,7 @@ func TestClient_GetUser_Success(t *testing.T) {
 	userId := 1
 	username := test.ValidUsername
 	email := test.ValidEmail
-	mockResponse := &GetUserResponse{
+	mockResponse := &user.GetUserResponse{
 		UserId:       userId,
 		Username:     username,
 		Email:        email,
@@ -177,12 +176,12 @@ func TestClient_GetUser_Success(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusOK, string(responseBody)),
 	}
 
-	request := &GetUserRequest{
+	request := &user.GetUserRequest{
 		UserId:   &userId,
 		Username: &username,
 		Email:    &email,
@@ -200,7 +199,7 @@ func TestClient_GetUser_NilRequest(t *testing.T) {
 	userId := 1
 	username := test.ValidUsername
 	email := test.ValidEmail
-	mockResponse := &GetUserResponse{
+	mockResponse := &user.GetUserResponse{
 		UserId:       userId,
 		Username:     username,
 		Email:        email,
@@ -213,7 +212,7 @@ func TestClient_GetUser_NilRequest(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusOK, string(responseBody)),
 	}
@@ -231,7 +230,7 @@ func TestClient_GetUser_QueryStringFailure(t *testing.T) {
 	userId := 1
 	username := test.ValidUsername
 	email := test.ValidEmail
-	mockResponse := &GetUserResponse{
+	mockResponse := &user.GetUserResponse{
 		UserId:       userId,
 		Username:     username,
 		Email:        email,
@@ -244,12 +243,12 @@ func TestClient_GetUser_QueryStringFailure(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusOK, string(responseBody)),
 	}
 
-	response, err := client.GetUser(&GetUserRequest{})
+	response, err := client.GetUser(&user.GetUserRequest{})
 	if err == nil {
 		t.Error(`client.GetUser(request, jwtString) error = "<nil>", expected non-nil`)
 	}
@@ -262,7 +261,7 @@ func TestClient_GetUser_InvalidBaseUrl(t *testing.T) {
 	userId := 1
 	username := test.ValidUsername
 	email := test.ValidEmail
-	mockResponse := &GetUserResponse{
+	mockResponse := &user.GetUserResponse{
 		UserId:       userId,
 		Username:     username,
 		Email:        email,
@@ -275,12 +274,12 @@ func TestClient_GetUser_InvalidBaseUrl(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    ":",
 		HttpClient: mock.NewHttpClient(http.StatusOK, string(responseBody)),
 	}
 
-	request := &GetUserRequest{
+	request := &user.GetUserRequest{
 		UserId:   &userId,
 		Username: &username,
 		Email:    &email,
@@ -298,12 +297,12 @@ func TestClient_GetUser_HttpClientError(t *testing.T) {
 	userId := 1
 	username := test.ValidUsername
 	email := test.ValidEmail
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewErrorHttpClient(),
 	}
 
-	request := &GetUserRequest{
+	request := &user.GetUserRequest{
 		UserId:   &userId,
 		Username: &username,
 		Email:    &email,
@@ -321,7 +320,7 @@ func TestClient_GetUser_BadStatusCode(t *testing.T) {
 	userId := 1
 	username := test.ValidUsername
 	email := test.ValidEmail
-	mockResponse := &GetUserResponse{
+	mockResponse := &user.GetUserResponse{
 		UserId:       userId,
 		Username:     username,
 		Email:        email,
@@ -334,12 +333,12 @@ func TestClient_GetUser_BadStatusCode(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusBadRequest, string(responseBody)),
 	}
 
-	request := &GetUserRequest{
+	request := &user.GetUserRequest{
 		UserId:   &userId,
 		Username: &username,
 		Email:    &email,
@@ -357,12 +356,12 @@ func TestClient_GetUser_BadResponseBody(t *testing.T) {
 	userId := 1
 	username := test.ValidUsername
 	email := test.ValidEmail
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusOK, "badResponseBody"),
 	}
 
-	request := &GetUserRequest{
+	request := &user.GetUserRequest{
 		UserId:   &userId,
 		Username: &username,
 		Email:    &email,
@@ -382,8 +381,8 @@ func TestClient_GetUsers_Success(t *testing.T) {
 	email := test.ValidEmail
 	prevLink := mockUrl + "/users/prev"
 	nextLink := mockUrl + "/users/next"
-	mockResponse := &GetUsersResponse{
-		Users: []User{
+	mockResponse := &user.GetUsersResponse{
+		Users: []user.User{
 			{
 				UserId:       userId,
 				Username:     username,
@@ -401,7 +400,7 @@ func TestClient_GetUsers_Success(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusOK, string(responseBody)),
 	}
@@ -410,7 +409,7 @@ func TestClient_GetUsers_Success(t *testing.T) {
 	offset := 2
 	sortField := "CreatedAt"
 	sortDirection := "ASC"
-	request := &GetUsersRequest{
+	request := &user.GetUsersRequest{
 		Limit:         &limit,
 		Offset:        &offset,
 		SortField:     &sortField,
@@ -441,8 +440,8 @@ func TestClient_GetUsers_NilRequest(t *testing.T) {
 	email := test.ValidEmail
 	prevLink := mockUrl + "/users/prev"
 	nextLink := mockUrl + "/users/next"
-	mockResponse := &GetUsersResponse{
-		Users: []User{
+	mockResponse := &user.GetUsersResponse{
+		Users: []user.User{
 			{
 				UserId:       userId,
 				Username:     username,
@@ -460,7 +459,7 @@ func TestClient_GetUsers_NilRequest(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusOK, string(responseBody)),
 	}
@@ -480,8 +479,8 @@ func TestClient_GetUsers_InvalidBaseUrl(t *testing.T) {
 	email := test.ValidEmail
 	prevLink := mockUrl + "/users/prev"
 	nextLink := mockUrl + "/users/next"
-	mockResponse := &GetUsersResponse{
-		Users: []User{
+	mockResponse := &user.GetUsersResponse{
+		Users: []user.User{
 			{
 				UserId:       userId,
 				Username:     username,
@@ -499,7 +498,7 @@ func TestClient_GetUsers_InvalidBaseUrl(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    ":",
 		HttpClient: mock.NewHttpClient(http.StatusOK, string(responseBody)),
 	}
@@ -508,7 +507,7 @@ func TestClient_GetUsers_InvalidBaseUrl(t *testing.T) {
 	offset := 2
 	sortField := "CreatedAt"
 	sortDirection := "ASC"
-	request := &GetUsersRequest{
+	request := &user.GetUsersRequest{
 		Limit:         &limit,
 		Offset:        &offset,
 		SortField:     &sortField,
@@ -524,7 +523,7 @@ func TestClient_GetUsers_InvalidBaseUrl(t *testing.T) {
 }
 
 func TestClient_GetUsers_HttpClientError(t *testing.T) {
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewErrorHttpClient(),
 	}
@@ -533,7 +532,7 @@ func TestClient_GetUsers_HttpClientError(t *testing.T) {
 	offset := 2
 	sortField := "CreatedAt"
 	sortDirection := "ASC"
-	request := &GetUsersRequest{
+	request := &user.GetUsersRequest{
 		Limit:         &limit,
 		Offset:        &offset,
 		SortField:     &sortField,
@@ -554,8 +553,8 @@ func TestClient_GetUsers_BadStatusCode(t *testing.T) {
 	email := test.ValidEmail
 	prevLink := mockUrl + "/users/prev"
 	nextLink := mockUrl + "/users/next"
-	mockResponse := &GetUsersResponse{
-		Users: []User{
+	mockResponse := &user.GetUsersResponse{
+		Users: []user.User{
 			{
 				UserId:       userId,
 				Username:     username,
@@ -573,7 +572,7 @@ func TestClient_GetUsers_BadStatusCode(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusBadRequest, string(responseBody)),
 	}
@@ -582,7 +581,7 @@ func TestClient_GetUsers_BadStatusCode(t *testing.T) {
 	offset := 2
 	sortField := "CreatedAt"
 	sortDirection := "ASC"
-	request := &GetUsersRequest{
+	request := &user.GetUsersRequest{
 		Limit:         &limit,
 		Offset:        &offset,
 		SortField:     &sortField,
@@ -598,7 +597,7 @@ func TestClient_GetUsers_BadStatusCode(t *testing.T) {
 }
 
 func TestClient_GetUsers_BadResponseBody(t *testing.T) {
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusOK, "badResponseBody"),
 	}
@@ -607,7 +606,7 @@ func TestClient_GetUsers_BadResponseBody(t *testing.T) {
 	offset := 2
 	sortField := "CreatedAt"
 	sortDirection := "ASC"
-	request := &GetUsersRequest{
+	request := &user.GetUsersRequest{
 		Limit:         &limit,
 		Offset:        &offset,
 		SortField:     &sortField,
@@ -627,7 +626,7 @@ func TestClient_UpdateUser_Success(t *testing.T) {
 	username := test.ValidUsername
 	email := test.ValidEmail
 	password := test.ValidPassword
-	mockResponse := &UpdateUserResponse{
+	mockResponse := &user.UpdateUserResponse{
 		UserId:       userId,
 		Username:     username,
 		Email:        email,
@@ -640,12 +639,12 @@ func TestClient_UpdateUser_Success(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusOK, string(responseBody)),
 	}
 
-	request := &UpdateUserRequest{
+	request := &user.UpdateUserRequest{
 		UserId:   userId,
 		Username: &username,
 		Email:    &email,
@@ -665,7 +664,7 @@ func TestClient_UpdateUser_NilRequest(t *testing.T) {
 	username := test.ValidUsername
 	email := test.ValidEmail
 	password := test.ValidPassword
-	mockResponse := &UpdateUserResponse{
+	mockResponse := &user.UpdateUserResponse{
 		UserId:       userId,
 		Username:     username,
 		Email:        email,
@@ -678,7 +677,7 @@ func TestClient_UpdateUser_NilRequest(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusOK, string(responseBody)),
 	}
@@ -697,7 +696,7 @@ func TestClient_UpdateUser_InvalidBaseUrl(t *testing.T) {
 	username := test.ValidUsername
 	email := test.ValidEmail
 	password := test.ValidPassword
-	mockResponse := &UpdateUserResponse{
+	mockResponse := &user.UpdateUserResponse{
 		UserId:       userId,
 		Username:     username,
 		Email:        email,
@@ -710,12 +709,12 @@ func TestClient_UpdateUser_InvalidBaseUrl(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    ":",
 		HttpClient: mock.NewHttpClient(http.StatusOK, string(responseBody)),
 	}
 
-	request := &UpdateUserRequest{
+	request := &user.UpdateUserRequest{
 		UserId:   userId,
 		Username: &username,
 		Email:    &email,
@@ -735,12 +734,12 @@ func TestClient_UpdateUser_HttpClientError(t *testing.T) {
 	username := test.ValidUsername
 	email := test.ValidEmail
 	password := test.ValidPassword
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewErrorHttpClient(),
 	}
 
-	request := &UpdateUserRequest{
+	request := &user.UpdateUserRequest{
 		UserId:   userId,
 		Username: &username,
 		Email:    &email,
@@ -760,7 +759,7 @@ func TestClient_UpdateUser_BadStatusCode(t *testing.T) {
 	username := test.ValidUsername
 	email := test.ValidEmail
 	password := test.ValidPassword
-	mockResponse := &UpdateUserResponse{
+	mockResponse := &user.UpdateUserResponse{
 		UserId:       userId,
 		Username:     username,
 		Email:        email,
@@ -773,12 +772,12 @@ func TestClient_UpdateUser_BadStatusCode(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusBadRequest, string(responseBody)),
 	}
 
-	request := &UpdateUserRequest{
+	request := &user.UpdateUserRequest{
 		UserId:   userId,
 		Username: &username,
 		Email:    &email,
@@ -798,12 +797,12 @@ func TestClient_UpdateUser_BadResponseBody(t *testing.T) {
 	username := test.ValidUsername
 	email := test.ValidEmail
 	password := test.ValidPassword
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusOK, "badResponseBody"),
 	}
 
-	request := &UpdateUserRequest{
+	request := &user.UpdateUserRequest{
 		UserId:   userId,
 		Username: &username,
 		Email:    &email,
@@ -820,17 +819,17 @@ func TestClient_UpdateUser_BadResponseBody(t *testing.T) {
 
 func TestClient_DeleteUser_Success(t *testing.T) {
 	userId := 1
-	mockResponse := &DeleteUserResponse{}
+	mockResponse := &user.DeleteUserResponse{}
 	responseBody, err := json.Marshal(mockResponse)
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusNoContent, string(responseBody)),
 	}
 
-	request := &DeleteUserRequest{
+	request := &user.DeleteUserRequest{
 		UserId: userId,
 	}
 	response, err := client.DeleteUser(request, jwtString)
@@ -843,12 +842,12 @@ func TestClient_DeleteUser_Success(t *testing.T) {
 }
 
 func TestClient_DeleteUser_NilRequest(t *testing.T) {
-	mockResponse := &DeleteUserResponse{}
+	mockResponse := &user.DeleteUserResponse{}
 	responseBody, err := json.Marshal(mockResponse)
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusNoContent, string(responseBody)),
 	}
@@ -864,17 +863,17 @@ func TestClient_DeleteUser_NilRequest(t *testing.T) {
 
 func TestClient_DeleteUser_InvalidBaseUrl(t *testing.T) {
 	userId := 1
-	mockResponse := &DeleteUserResponse{}
+	mockResponse := &user.DeleteUserResponse{}
 	responseBody, err := json.Marshal(mockResponse)
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    ":",
 		HttpClient: mock.NewHttpClient(http.StatusNoContent, string(responseBody)),
 	}
 
-	request := &DeleteUserRequest{
+	request := &user.DeleteUserRequest{
 		UserId: userId,
 	}
 	response, err := client.DeleteUser(request, jwtString)
@@ -888,12 +887,12 @@ func TestClient_DeleteUser_InvalidBaseUrl(t *testing.T) {
 
 func TestClient_DeleteUser_HttpClientError(t *testing.T) {
 	userId := 1
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewErrorHttpClient(),
 	}
 
-	request := &DeleteUserRequest{
+	request := &user.DeleteUserRequest{
 		UserId: userId,
 	}
 	response, err := client.DeleteUser(request, jwtString)
@@ -907,17 +906,17 @@ func TestClient_DeleteUser_HttpClientError(t *testing.T) {
 
 func TestClient_DeleteUser_BadStatusCode(t *testing.T) {
 	userId := 1
-	mockResponse := &DeleteUserResponse{}
+	mockResponse := &user.DeleteUserResponse{}
 	responseBody, err := json.Marshal(mockResponse)
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusBadRequest, string(responseBody)),
 	}
 
-	request := &DeleteUserRequest{
+	request := &user.DeleteUserRequest{
 		UserId: userId,
 	}
 	response, err := client.DeleteUser(request, jwtString)
@@ -931,17 +930,17 @@ func TestClient_DeleteUser_BadStatusCode(t *testing.T) {
 
 func TestClient_VerifyUser_Success(t *testing.T) {
 	userId := 1
-	mockResponse := &VerifyUserResponse{}
+	mockResponse := &user.VerifyUserResponse{}
 	responseBody, err := json.Marshal(mockResponse)
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusNoContent, string(responseBody)),
 	}
 
-	request := &VerifyUserRequest{
+	request := &user.VerifyUserRequest{
 		UserId: userId,
 	}
 	response, err := client.VerifyUser(request, jwtString)
@@ -954,12 +953,12 @@ func TestClient_VerifyUser_Success(t *testing.T) {
 }
 
 func TestClient_VerifyUser_NilRequest(t *testing.T) {
-	mockResponse := &VerifyUserResponse{}
+	mockResponse := &user.VerifyUserResponse{}
 	responseBody, err := json.Marshal(mockResponse)
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusNoContent, string(responseBody)),
 	}
@@ -975,17 +974,17 @@ func TestClient_VerifyUser_NilRequest(t *testing.T) {
 
 func TestClient_VerifyUser_InvalidBaseUrl(t *testing.T) {
 	userId := 1
-	mockResponse := &VerifyUserResponse{}
+	mockResponse := &user.VerifyUserResponse{}
 	responseBody, err := json.Marshal(mockResponse)
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    ":",
 		HttpClient: mock.NewHttpClient(http.StatusNoContent, string(responseBody)),
 	}
 
-	request := &VerifyUserRequest{
+	request := &user.VerifyUserRequest{
 		UserId: userId,
 	}
 	response, err := client.VerifyUser(request, jwtString)
@@ -999,12 +998,12 @@ func TestClient_VerifyUser_InvalidBaseUrl(t *testing.T) {
 
 func TestClient_VerifyUser_HttpClientError(t *testing.T) {
 	userId := 1
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewErrorHttpClient(),
 	}
 
-	request := &VerifyUserRequest{
+	request := &user.VerifyUserRequest{
 		UserId: userId,
 	}
 	response, err := client.VerifyUser(request, jwtString)
@@ -1018,17 +1017,17 @@ func TestClient_VerifyUser_HttpClientError(t *testing.T) {
 
 func TestClient_VerifyUser_BadStatusCode(t *testing.T) {
 	userId := 1
-	mockResponse := &VerifyUserResponse{}
+	mockResponse := &user.VerifyUserResponse{}
 	responseBody, err := json.Marshal(mockResponse)
 	if err != nil {
 		t.Errorf("unable to marshal mock get user response: %v", err)
 	}
-	client := ClientImpl{
+	client := user.ClientImpl{
 		BaseUrl:    mockUrl,
 		HttpClient: mock.NewHttpClient(http.StatusBadRequest, string(responseBody)),
 	}
 
-	request := &VerifyUserRequest{
+	request := &user.VerifyUserRequest{
 		UserId: userId,
 	}
 	response, err := client.VerifyUser(request, jwtString)
@@ -1037,65 +1036,5 @@ func TestClient_VerifyUser_BadStatusCode(t *testing.T) {
 	}
 	if response != nil {
 		t.Errorf(`client.VerifyUser(request, jwtString) response = "%v", expected "<nil>"`, response)
-	}
-}
-
-func TestClient_createGetUserQueryString(t *testing.T) {
-	userId := 1
-	username := test.ValidUsername
-	email := test.ValidEmail
-	expectedQueryString := fmt.Sprintf(
-		"%s=%s&%s=%d&%s=%s",
-		EmailKey,
-		strings.ReplaceAll(email, "@", "%40"),
-		UserIdKey,
-		userId,
-		UsernameKey,
-		username,
-	)
-
-	request := &GetUserRequest{
-		UserId:   &userId,
-		Username: &username,
-		Email:    &email,
-	}
-	queryString, err := createGetUserQueryString(request)
-	if err != nil {
-		t.Errorf("failed to create query string: %v", err)
-	}
-	if queryString != expectedQueryString {
-		t.Errorf(`queryString: "%s", expected "%s"`, queryString, expectedQueryString)
-	}
-}
-
-func TestClient_createGetUsersQueryString(t *testing.T) {
-	limit := 1
-	offset := 2
-	sortField := "CreatedAt"
-	sortDirection := "asc"
-	expectedQueryString := fmt.Sprintf(
-		"%s=%d&%s=%d&%s=%s&%s=%s",
-		LimitKey,
-		limit,
-		OffsetKey,
-		offset,
-		SortDirectionKey,
-		sortDirection,
-		SortFieldKey,
-		sortField,
-	)
-
-	request := &GetUsersRequest{
-		Limit:         &limit,
-		Offset:        &offset,
-		SortField:     &sortField,
-		SortDirection: &sortDirection,
-	}
-	queryString, err := createGetUsersQueryString(request)
-	if err != nil {
-		t.Errorf("failed to create query string: %v", err)
-	}
-	if queryString != expectedQueryString {
-		t.Errorf(`queryString: "%s", expected "%s"`, queryString, expectedQueryString)
 	}
 }
