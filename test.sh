@@ -2,7 +2,7 @@
 set -euo pipefail
 
 PROJECT_ROOT="$(pwd)"
-SERVICES=("user")
+SERVICES=("user" "auth")
 
 echo "Running unit tests..."
 
@@ -25,7 +25,12 @@ cd $PROJECT_ROOT
 echo -e "\nRunning Postman tests..."
 for SERVICE in "${SERVICES[@]}"; do
     echo "---------- ${SERVICE} ----------"
-    newman run "postman/collection/Quizchief - ${SERVICE^} Service.postman_collection.json" \
-        --environment "postman/environment/Quizchief - Local.postman_environment.json" \
-        --reporters cli,json
+    COLLECTION="postman/collection/Quizchief - ${SERVICE^} Service.postman_collection.json"
+    if [[ -f "$COLLECTION" ]]; then
+        newman run "$COLLECTION" \
+            --environment "postman/environment/Quizchief - Local.postman_environment.json" \
+            --reporters cli,json
+    else
+        echo "$COLLECTION not found"
+    fi
 done
