@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/jwtauth/v5"
 	_ "github.com/lib/pq" // registers "postgres" driver
 	"log"
 	"net/http"
@@ -32,26 +33,26 @@ func RunServer() {
 		Queries: queries,
 	}
 
-	router := chi.NewRouter()
-	router.Use(middleware.RequestID)
-	router.Use(middleware.RealIP)
-	router.Use(middleware.Logger)
-	router.Use(middleware.Recoverer)
-	router.Use(middleware.Timeout(time.Minute))
+	r := chi.NewRouter()
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+	r.Use(middleware.Timeout(time.Minute))
 
-	router.Post("/user", CreateUserHandler(service))
-	router.Group(
-		func(router chi.Router) {
-			// TODO r.Use(jwtauth.Verifier(tokenAuth))
-			// TODO r.Use(jwtauth.Authenticator(tokenAuth))
-			// TODO r.Use(user.authMiddleware(*queries))
+	r.Post("/user", CreateUserHandler(service))
+	r.Get("/user", GetUserHandler(service))
+	r.Get("/user/all", GetUsersHandler(service))
+	r.Patch(fmt.Sprintf(api.VerifyUserEndpoint, "{id}"), VerifyUserHandler(service))
+	r.Group(
+		func(r chi.Router) {
+			r.Use(jwtauth.Verifier(common.TokenAuth))
+			r.Use(jwtauth.Authenticator(common.TokenAuth))
+			r.Use(common.AuthMiddleware())
 
-			router.Get("/user/me", GetCurrentUserHandler(service))
-			router.Get("/user", GetUserHandler(service))
-			router.Get("/user/all", GetUsersHandler(service))
-			router.Patch("/user/{id}", UpdateUserHandler(service))
-			router.Delete("/user/{id}", DeleteUserHandler(service))
-			router.Patch(fmt.Sprintf(api.VerifyUserEndpoint, "{id}"), VerifyUserHandler(service))
+			r.Get("/user/me", GetCurrentUserHandler(service))
+			r.Patch("/user/{id}", UpdateUserHandler(service))
+			r.Delete("/user/{id}", DeleteUserHandler(service))
 		},
 	)
 
@@ -63,7 +64,7 @@ func RunServer() {
 
 	fmt.Println("Listening on port " + port)
 
-	err = http.ListenAndServe(":"+port, router)
+	err = http.ListenAndServe(":"+port, r)
 	if err != nil {
 		log.Fatalf("Server error: %v", err)
 	}
