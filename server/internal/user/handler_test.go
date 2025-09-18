@@ -162,7 +162,7 @@ func TestGetCurrentUserHandler_Success(t *testing.T) {
 		},
 	}
 
-	userClaims := &common.UserClaims{
+	userClaims := common.UserClaims{
 		ID:       1,
 		Username: test.ValidUsername,
 		Email:    test.ValidEmail,
@@ -222,7 +222,7 @@ func TestGetCurrentUserHandler_ServiceFailure(t *testing.T) {
 		},
 	}
 
-	userClaims := &common.UserClaims{
+	userClaims := common.UserClaims{
 		ID:       1,
 		Username: test.ValidUsername,
 		Email:    test.ValidEmail,
@@ -247,7 +247,7 @@ func TestGetCurrentUserHandler_UserNotFound(t *testing.T) {
 		},
 	}
 
-	userClaims := &common.UserClaims{
+	userClaims := common.UserClaims{
 		ID:       1,
 		Username: test.ValidUsername,
 		Email:    test.ValidEmail,

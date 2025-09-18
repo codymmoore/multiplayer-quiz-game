@@ -38,7 +38,7 @@ func AuthMiddleware() func(http.Handler) http.Handler {
 				}
 
 				claims := UserClaims{
-					ID:       claimsMap["user_id"].(int),
+					ID:       int(claimsMap["user_id"].(float64)),
 					Username: claimsMap["username"].(string),
 					Email:    claimsMap["email"].(string),
 				}
@@ -59,7 +59,7 @@ func AuthMiddleware() func(http.Handler) http.Handler {
 					Email:    &claims.Email,
 				}
 				if _, err := userClient.GetUser(getUserRequest); err != nil {
-					http.Error(w, fmt.Sprintf("unable to get user: %v", err), http.StatusInternalServerError)
+					http.Error(w, fmt.Sprintf("unable to get user: %v", err), http.StatusUnauthorized)
 					return
 				}
 
