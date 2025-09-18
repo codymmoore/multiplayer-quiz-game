@@ -24,7 +24,8 @@
 									"pm.environment.set(\"username\", username);\r",
 									"pm.environment.set(\"email\", email);\r",
 									"pm.environment.set(\"password\", password);\r",
-									"pm.collectionVariables.set(\"userIndex\", userIndex);"
+									"pm.collectionVariables.set(\"userIndex\", userIndex);\r",
+									"pm.collectionVariables.set(\"isVerified\", false);"
 								],
 								"type": "text/javascript",
 								"packages": {}
@@ -531,6 +532,31 @@
 					},
 					"response": []
 				}
+			],
+			"auth": {
+				"type": "noauth"
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
 			]
 		},
 		{
@@ -573,6 +599,8 @@
 									"    pm.expect(responseJson.passwordHash).to.be.a(\"string\");\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"isVerified\");\r",
+									"    pm.expect(responseJson.isVerified).to.equal(pm.collectionVariables.get(\"isVerified\"));\r",
+									"\r",
 									"    pm.expect(responseJson.isVerified).to.be.a(\"boolean\");\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"createdAt\");\r",
@@ -659,7 +687,7 @@
 									"    pm.expect(responseJson.passwordHash).to.be.a(\"string\");\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"isVerified\");\r",
-									"    pm.expect(responseJson.isVerified).to.be.a(\"boolean\");\r",
+									"    pm.expect(responseJson.isVerified).to.equal(pm.collectionVariables.get(\"isVerified\"));\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"createdAt\");\r",
 									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
@@ -743,7 +771,7 @@
 									"    pm.expect(responseJson.passwordHash).to.be.a(\"string\");\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"isVerified\");\r",
-									"    pm.expect(responseJson.isVerified).to.be.a(\"boolean\");\r",
+									"    pm.expect(responseJson.isVerified).to.equal(pm.collectionVariables.get(\"isVerified\"));\r",
 									"\r",
 									"    pm.expect(responseJson).to.have.property(\"createdAt\");\r",
 									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
@@ -843,13 +871,358 @@
 					},
 					"response": []
 				}
+			],
+			"auth": {
+				"type": "noauth"
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "Verify User",
+			"item": [
+				{
+					"name": "Verify User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 204\", () => {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});\r",
+									"\r",
+									"pm.collectionVariables.set(\"isVerified\", true);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{userUrl}}/user/{{userId}}/verify",
+							"host": [
+								"{{userUrl}}"
+							],
+							"path": [
+								"user",
+								"{{userId}}",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Fail - Nonexistent User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 404\", () => {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{userUrl}}/user/9999/verify",
+							"host": [
+								"{{userUrl}}"
+							],
+							"path": [
+								"user",
+								"9999",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid User ID - Negative",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{userUrl}}/user/-1/verify",
+							"host": [
+								"{{userUrl}}"
+							],
+							"path": [
+								"user",
+								"-1",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid User ID - Wrong Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 400\", () => {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{userUrl}}/user/abcd/verify",
+							"host": [
+								"{{userUrl}}"
+							],
+							"path": [
+								"user",
+								"abcd",
+								"verify"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "noauth"
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
 			]
 		},
 		{
 			"name": "Get Current User",
 			"item": [
 				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response is populated\", () => {\r",
+									"    pm.expect(responseJson).to.have.property(\"accessToken\");\r",
+									"    pm.expect(responseJson.accessToken).to.be.a(\"string\");\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"jwt\", responseJson.accessToken);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"{{password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authUrl}}/login",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Get Current User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response is populated\", () => {\r",
+									"    pm.expect(responseJson).to.have.property(\"userId\");\r",
+									"    pm.expect(responseJson.userId).to.be.a(\"number\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"username\");\r",
+									"    pm.expect(responseJson.username).to.equal(pm.environment.get(\"username\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"email\");\r",
+									"    pm.expect(responseJson.email).to.equal(pm.environment.get(\"email\"));\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"passwordHash\");\r",
+									"    pm.expect(responseJson.passwordHash).to.be.a(\"string\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"isVerified\");\r",
+									"    pm.expect(responseJson.isVerified).to.equal(pm.collectionVariables.get(\"isVerified\"));\r",
+									"\r",
+									"    pm.expect(responseJson.isVerified).to.be.a(\"boolean\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"createdAt\");\r",
+									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
+									"\r",
+									"    pm.expect(responseJson).to.have.property(\"updatedAt\");\r",
+									"    pm.expect(responseJson.createdAt).to.be.a(\"string\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -858,7 +1231,54 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"coco\",\r\n    \"email\": \"coco@gmail.com\",\r\n    \"password\": \"uarhstiranarstt\"\r\n}",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{userUrl}}/user/me",
+							"host": [
+								"{{userUrl}}"
+							],
+							"path": [
+								"user",
+								"me"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unauthorized - Missing JWT",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 401\", () => {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -878,11 +1298,95 @@
 					},
 					"response": []
 				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{jwt}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
 			]
 		},
 		{
 			"name": "Update User",
 			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response is populated\", () => {\r",
+									"    pm.expect(responseJson).to.have.property(\"accessToken\");\r",
+									"    pm.expect(responseJson.accessToken).to.be.a(\"string\");\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"jwt\", responseJson.accessToken);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"{{password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authUrl}}/login",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "Update User - Username",
 					"event": [
@@ -933,7 +1437,7 @@
 									"const userIndex = Number(pm.variables.get(\"userIndex\")) + 1;\r",
 									"const username = `testUser-${userIndex}`;\r",
 									"\r",
-									"pm.environment.set(\"username\", username);\r",
+									"pm.variables.set(\"newUsername\", username);\r",
 									"pm.collectionVariables.set(\"userIndex\", userIndex);"
 								],
 								"type": "text/javascript",
@@ -946,7 +1450,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"username\": \"{{username}}\"\r\n}",
+							"raw": "{\r\n    \"username\": \"{{newUsername}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -961,6 +1465,58 @@
 							"path": [
 								"user",
 								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response is populated\", () => {\r",
+									"    pm.expect(responseJson).to.have.property(\"accessToken\");\r",
+									"    pm.expect(responseJson.accessToken).to.be.a(\"string\");\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"jwt\", responseJson.accessToken);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"{{password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authUrl}}/login",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"login"
 							]
 						}
 					},
@@ -1017,7 +1573,7 @@
 									"const username = `testUser-${userIndex}`;\r",
 									"const email = `${username}@test.com`\r",
 									"\r",
-									"pm.environment.set(\"email\", email);\r",
+									"pm.variables.set(\"newEmail\", email);\r",
 									"pm.collectionVariables.set(\"userIndex\", userIndex + 1);"
 								],
 								"type": "text/javascript",
@@ -1030,7 +1586,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\": \"{{email}}\"\r\n}",
+							"raw": "{\r\n    \"email\": \"{{newEmail}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1045,6 +1601,58 @@
 							"path": [
 								"user",
 								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response is populated\", () => {\r",
+									"    pm.expect(responseJson).to.have.property(\"accessToken\");\r",
+									"    pm.expect(responseJson.accessToken).to.be.a(\"string\");\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"jwt\", responseJson.accessToken);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"{{password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authUrl}}/login",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"login"
 							]
 						}
 					},
@@ -1110,6 +1718,64 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\r\n    \"password\": \"!arstrartastA4{{userIndex}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{userUrl}}/user/{{userId}}",
+							"host": [
+								"{{userUrl}}"
+							],
+							"path": [
+								"user",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unauthorized - Missing JWT",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 401\", () => {\r",
+									"    pm.response.to.have.status(401);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const userIndex = Number(pm.variables.get(\"userIndex\")) + 1;\r",
+									"const username = `testUser-${userIndex}`;\r",
+									"\r",
+									"pm.variables.set(\"newUsername\", username);\r",
+									"pm.collectionVariables.set(\"userIndex\", userIndex);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{newUsername}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1741,6 +2407,38 @@
 					},
 					"response": []
 				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{jwt}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
 			]
 		},
 		{
@@ -1946,198 +2644,30 @@
 					},
 					"response": []
 				}
-			]
-		},
-		{
-			"name": "Verify User",
-			"item": [
+			],
+			"auth": {
+				"type": "noauth"
+			},
+			"event": [
 				{
-					"name": "Verify User",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status is 204\", () => {\r",
-									"    pm.response.to.have.status(204);\r",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{userUrl}}/user/{{userId}}/verify",
-							"host": [
-								"{{userUrl}}"
-							],
-							"path": [
-								"user",
-								"{{userId}}",
-								"verify"
-							]
-						}
-					},
-					"response": []
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
 				},
 				{
-					"name": "Fail - Nonexistent User",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status is 404\", () => {\r",
-									"    pm.response.to.have.status(404);\r",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{userUrl}}/user/9999/verify",
-							"host": [
-								"{{userUrl}}"
-							],
-							"path": [
-								"user",
-								"9999",
-								"verify"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Invalid User ID - Negative",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status is 400\", () => {\r",
-									"    pm.response.to.have.status(400);\r",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{userUrl}}/user/-1/verify",
-							"host": [
-								"{{userUrl}}"
-							],
-							"path": [
-								"user",
-								"-1",
-								"verify"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Invalid User ID - Wrong Type",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status is 400\", () => {\r",
-									"    pm.response.to.have.status(400);\r",
-									"});"
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript",
-								"packages": {}
-							}
-						}
-					],
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{userUrl}}/user/abcd/verify",
-							"host": [
-								"{{userUrl}}"
-							],
-							"path": [
-								"user",
-								"abcd",
-								"verify"
-							]
-						}
-					},
-					"response": []
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
 				}
 			]
 		},
@@ -2145,14 +2675,66 @@
 			"name": "Delete User",
 			"item": [
 				{
-					"name": "Delete User",
+					"name": "Login",
 					"event": [
 						{
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Status is 204\", () => {\r",
-									"    pm.response.to.have.status(204);\r",
+									"pm.test(\"Status is 200\", () => {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const responseJson = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response is populated\", () => {\r",
+									"    pm.expect(responseJson).to.have.property(\"accessToken\");\r",
+									"    pm.expect(responseJson.accessToken).to.be.a(\"string\");\r",
+									"});\r",
+									"\r",
+									"pm.environment.set(\"jwt\", responseJson.accessToken);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"username\": \"{{username}}\",\r\n    \"password\": \"{{password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{authUrl}}/login",
+							"host": [
+								"{{authUrl}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Unauthorized - Missing JWT",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 401\", () => {\r",
+									"    pm.response.to.have.status(401);\r",
 									"});"
 								],
 								"type": "text/javascript",
@@ -2161,6 +2743,9 @@
 						}
 					],
 					"request": {
+						"auth": {
+							"type": "noauth"
+						},
 						"method": "DELETE",
 						"header": [],
 						"body": {
@@ -2327,6 +2912,79 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Delete User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status is 204\", () => {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{userUrl}}/user/{{userId}}",
+							"host": [
+								"{{userUrl}}"
+							],
+							"path": [
+								"user",
+								"{{userId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{jwt}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
 				}
 			]
 		}
