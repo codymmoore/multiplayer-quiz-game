@@ -69,7 +69,7 @@ func RunServer() {
 	r.Use(middleware.Timeout(time.Minute))
 	// r.Use(jwtauth.Verifier(common.TokenAuth))
 	// r.Use(jwtauth.Authenticator(common.TokenAuth))
-	r.Use(common.JWTMiddleware())
+	// r.Use(common.JWTMiddleware())
 
 	r.Post(api.LoginEndpoint, LoginHandler(service))
 	r.Post(api.LogoutEndpoint, LogoutHandler(service))

@@ -58,7 +58,7 @@ func (s *ServiceImpl) Login(ctx context.Context, request *api.LoginRequest) (*ap
 	if !usr.IsVerified {
 		return nil, &errors.HTTP{
 			StatusCode: http.StatusUnauthorized,
-			Message:    "invalid credentials",
+			Message:    "unverified user",
 		}
 	}
 
